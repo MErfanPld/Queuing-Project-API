@@ -107,8 +107,9 @@ class AddFundsView(LoginRequiredMixin, FormView):
         amount = form.cleaned_data['amount']
         if amount > 0:
             wallet.add_funds(amount)
-            messages.success(self.request, f"موجودی کیف پول با موفقیت به {
-                             amount} افزایش یافت.")
+            # messages.success(self.request, f"موجودی کیف پول با موفقیت به {
+            #                  amount} افزایش یافت.")
+            print("...")
         else:
             messages.error(self.request, "مقدار باید بزرگتر از صفر باشد.")
             return self.form_invalid(form)
