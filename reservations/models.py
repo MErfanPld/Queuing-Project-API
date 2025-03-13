@@ -47,7 +47,16 @@ class AvailableTimeSlot(models.Model):
         verbose_name_plural = "ساعت‌های در دسترس"
 
     def __str__(self):
-        return f"{self.service.name} | {self.date} - {self.time}"
+        return f"{self.service.name} - {self.jdate()} {self.time.strftime('%H:%M')}"
 
     def jdate(self):
         return jalali_converter(self.date)
+
+    # روش برای بررسی وضعیت رزرو
+    @classmethod
+    def check_available(cls, service, date, time):
+        try:
+            slot = cls.objects.get(service=service, date=date, time=time)
+            return slot.is_booked == False
+        except cls.DoesNotExist:
+            return False

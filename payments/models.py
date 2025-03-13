@@ -31,15 +31,17 @@ class Wallet(models.Model):
 
 class Transaction(models.Model):
     wallet = models.ForeignKey(Wallet, on_delete=models.CASCADE)
-    appointment = models.ForeignKey(Appointment, blank=True,null=True,on_delete=models.CASCADE)  # اضافه کردن فیلد appointment
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    appointment = models.ForeignKey(Appointment, blank=True, null=True,
+                                    on_delete=models.CASCADE)  # اضافه کردن فیلد appointment
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
+
     class Meta:
         verbose_name = "تراکنش"
         verbose_name_plural = "تراکنش‌ها"
 
     def __str__(self):
-        return f"{self.wallet.user} - {self.amount} تومان"
+        return f"تراکنش {self.wallet.user} - {self.amount} تومان ({self.created_at.strftime('%Y-%m-%d %H:%M')})"
 
     def jcreated(self):
         return jalali_converter(self.created_at)
@@ -77,15 +79,18 @@ class UserWithdrawalRequests(models.Model):
                 previous = UserWithdrawalRequests.objects.get(pk=self.pk)
                 if previous.status != self.status and self.status == 'paid':
                     wallet = Wallet.objects.get(user=self.user)
-                    wallet.balance -= Decimal(self.appointment.service.price)
-                    wallet.balance = 0 if wallet.balance < 0 else wallet.balance
-                    wallet.save()
+                    withdrawal_amount = self.appointment.service.price
 
+                    if wallet.balance >= withdrawal_amount:
+                        wallet.balance -= withdrawal_amount
+                    else:
+                        wallet.balance = 0  # یا پیام خطا مدیریت شود
+
+                    wallet.save()
             except UserWithdrawalRequests.DoesNotExist:
-                # Instance does not exist in the database yet
                 pass
 
         super().save(*args, **kwargs)
-        
+
     def jcreated(self):
         return jalali_converter(self.date)

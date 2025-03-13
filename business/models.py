@@ -71,4 +71,4 @@ class Service(models.Model):
         return f"{self.name} | {self.employee} ({self.business.name})"
 
     def get_price(self):
-        return Decimal(self.price)
+        return self.price
