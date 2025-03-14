@@ -64,8 +64,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'config.middleware.APICorsMiddleware',
     'corsheaders.middleware.CorsMiddleware', 
+    'config.middleware.APICorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -207,9 +207,10 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
+
+# CORS HTTP
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_ALLOW_METHODS = [
     "GET",
     "POST",
@@ -218,12 +219,10 @@ CORS_ALLOW_METHODS = [
     "DELETE",
     "OPTIONS"
 ]
-
 CORS_ALLOW_HEADERS = [
     "content-type",
     "authorization",
     "x-requested-with"
 ]
-
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", ]
