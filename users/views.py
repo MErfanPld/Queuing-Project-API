@@ -7,28 +7,28 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from .serializers import UserCreateSerializer, UserUpdateSerializer, UserSerializer
 from .models import User
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
-class UserProfileView(APIView):
+class UserProfileRetrieveView(generics.RetrieveAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    # مشاهده پروفایل کاربر
-    def get(self, request):
-        user = request.user
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+    def get_object(self):
+        return self.request.user
 
-    # ویرایش پروفایل کاربر
-    def put(self, request):
-        user = request.user
-        serializer = UserUpdateSerializer(user, data=request.data, partial=True)
+class UserProfileUpdateView(generics.UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserUpdateSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    def get_object(self):
+        return self.request.user
 
 class UserListView(generics.ListCreateAPIView):
     queryset = User.objects.all()
