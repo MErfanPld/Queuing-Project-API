@@ -1,9 +1,13 @@
 from rest_framework import serializers
+
+from business.serializers import EmployeeSerializer, ServiceSerializer
 from .models import Appointment, AvailableTimeSlot
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
     get_status = serializers.ReadOnlyField()
+    service = ServiceSerializer(read_only=True)
+    employee = EmployeeSerializer(read_only=True)
 
     class Meta:
         model = Appointment
