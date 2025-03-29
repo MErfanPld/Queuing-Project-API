@@ -6,12 +6,26 @@ from .models import Appointment, AvailableTimeSlot
 
 class AppointmentSerializer(serializers.ModelSerializer):
     get_status = serializers.ReadOnlyField()
-    service = ServiceSerializer(read_only=True)
-    employee = EmployeeSerializer(read_only=True)
+    service = serializers.SerializerMethodField()
+    employee = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
-        fields = '__all__'
+        fields = ['date', 'time', 'status', 'user', 'service', 'employee', 'get_status']
+
+    def get_service(self, obj):
+        return {'name': obj.service.name} if obj.service else None
+
+    def get_employee(self, obj):
+        if obj.employee:
+            return {
+                'first_name': obj.employee.user.first_name,
+                'last_name': obj.employee.user.last_name,
+                'skill': obj.employee.skill
+            }
+        return None
+
+
 
 class AvailableTimeSlotSerializer(serializers.ModelSerializer):
     class Meta:
