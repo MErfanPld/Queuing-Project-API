@@ -1,3 +1,19 @@
+from rest_framework import generics, permissions
+from .models import Slider
+from .serializers import SliderSerializer
+
+class SliderListCreateView(generics.ListCreateAPIView):
+    queryset = Slider.objects.all()
+    serializer_class = SliderSerializer
+    permission_classes = [permissions.AllowAny]  
+
+class SliderRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Slider.objects.all()
+    serializer_class = SliderSerializer
+    permission_classes = [permissions.IsAdminUser]  
+
+
+
 # from django.shortcuts import render, redirect
 # from django.contrib.auth.mixins import LoginRequiredMixin
 # from django.views import View

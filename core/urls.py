@@ -1,7 +1,7 @@
 from django.urls import path
-from .views import *
+from .views import SliderListCreateView, SliderRetrieveUpdateDestroyView
 
 urlpatterns = [
-    # path('', home,name="home"),
-    # path('dashboard/', Dashboard.as_view(),name="dashboard"),
+    path("sliders/", SliderListCreateView.as_view(), name="slider-list-create"),
+    path("sliders/<int:pk>/", SliderRetrieveUpdateDestroyView.as_view(), name="slider-detail"),
 ]
