@@ -59,6 +59,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     def jcreated(self):
         return jalali_converter(self.created_at)
 
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}".strip() if self.first_name or self.last_name else self.phone_number
+
     def save(self, *args, **kwargs):
         if self.phone_number:
             self.phone_number = mobile_validator(
