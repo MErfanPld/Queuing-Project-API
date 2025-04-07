@@ -24,28 +24,48 @@ class EmployeeSerializer(serializers.ModelSerializer):
         employee = Employee.objects.create(user=user, **validated_data)
         return employee
 
+
+class EmployeeCreateUpdateSerializer(serializers.ModelSerializer):
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        source='user',
+        write_only=True
+    )
+    user = serializers.SerializerMethodField(read_only=True)  # نمایش نام کاربر
+
+    class Meta:
+        model = Employee
+        fields = ['id', 'user_id', 'user', 'skill']
+
+    def get_user(self, obj):
+        return {
+            "id": obj.user.id,
+            "name": f"{obj.user.first_name} {obj.user.last_name}".strip(),
+            "phone": obj.user.phone_number,
+        }
+
+
 class ServiceSerializer(serializers.ModelSerializer):
-    business = BusinessSerializer()  
-    employee = EmployeeSerializer()  
+    business_id = serializers.PrimaryKeyRelatedField(
+        queryset=Business.objects.all(), source='business', write_only=True
+    )
+    employee_id = serializers.PrimaryKeyRelatedField(
+        queryset=Employee.objects.all(), source='employee', write_only=True
+    )
+
+    business = BusinessSerializer(read_only=True)
+    employee = EmployeeSerializer(read_only=True)
 
     class Meta:
         model = Service
-        fields = '__all__'
-
-    def create(self, validated_data):
-        business_data = validated_data.pop('business')
-        employee_data = validated_data.pop('employee')  
-        user_data = employee_data.pop('user')  
-
-        # بررسی اینکه آیا `business` از قبل وجود دارد یا نه
-        business, _ = Business.objects.get_or_create(name=business_data['name'], defaults=business_data)
-
-        # بررسی اینکه آیا `user` از قبل وجود دارد یا نه
-        user, _ = User.objects.get_or_create(phone_number=user_data['phone_number'], defaults=user_data)
-
-        # بررسی اینکه آیا `employee` از قبل وجود دارد یا نه
-        employee, _ = Employee.objects.get_or_create(user=user, defaults=employee_data)
-
-        # ایجاد `Service` با `business` و `employee`
-        service = Service.objects.create(business=business, employee=employee, **validated_data)
-        return service
+        fields = [
+            'id',
+            'name',
+            'price',
+            'description',
+            'duration',
+            'business_id',
+            'employee_id',
+            'business',
+            'employee'
+        ]

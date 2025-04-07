@@ -19,12 +19,19 @@ class BusinessRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 #? ============================= Employee CRUD =============================
 
-class EmployeeListCreateView(generics.ListCreateAPIView):
+class EmployeeListView(generics.ListAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
+class EmployeeCreateView(generics.CreateAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeCreateUpdateSerializer
 
-class EmployeeRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class EmployeeUpdateView(generics.UpdateAPIView):
+    queryset = Employee.objects.all()
+    serializer_class = EmployeeCreateUpdateSerializer
+
+class EmployeeRetrieveDestroyView(generics.RetrieveDestroyAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
