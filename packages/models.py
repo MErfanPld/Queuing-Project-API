@@ -35,9 +35,6 @@ class Package(models.Model):
         self.total_price = self.calculate_total_price()
         super().save(update_fields=['total_price'])
 
-    def average_rating(self):
-        """محاسبه میانگین امتیاز نظرات این پکیج"""
-        return self.reviews.aggregate(avg_rating=Avg('rating'))['avg_rating'] or 0
 
 
 class PackageReview(models.Model):
