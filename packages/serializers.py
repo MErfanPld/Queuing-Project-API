@@ -1,12 +1,17 @@
 from rest_framework import serializers
+
+from business.models import Service
 from .models import Package
 from business.serializers import ServiceSerializer
 
-
 class PackageSerializer(serializers.ModelSerializer):
-    services = ServiceSerializer(many=True, read_only=True)
-    business_name = serializers.CharField(source='business.name', read_only=True)
-    
+    services = serializers.PrimaryKeyRelatedField(
+        queryset=Service.objects.all(), many=True
+    )
+    business_name = serializers.CharField(
+        source='business.name', read_only=True
+    )
+
     class Meta:
         model = Package
         fields = [
@@ -18,16 +23,17 @@ class PackageSerializer(serializers.ModelSerializer):
             'desc',
             'total_price',
             'image',
-            'media_files'
+            'media_files',
         ]
         extra_kwargs = {
-            'business': {'write_only': True}
+            'business': {'write_only': True},
+            'total_price': {'read_only': True},
         }
 
     def to_representation(self, instance):
-        representation = super().to_representation(instance)
+        rep = super().to_representation(instance)
         if instance.image:
-            representation['image'] = instance.image.url
+            rep['image'] = instance.image.url
         if instance.media_files:
-            representation['media_files'] = instance.media_files.url
-        return representation
+            rep['media_files'] = instance.media_files.url
+        return rep

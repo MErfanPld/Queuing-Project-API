@@ -143,13 +143,14 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+# Media files (Uploaded files)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, "static_cdn", "media_root")
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # STATIC_ROOT = os.path.join(BASE_DIR, "static", "root")
 # STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
@@ -228,3 +229,6 @@ CORS_ALLOW_HEADERS = [
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000", ]
+
+DJANGO_FILTERS_USE_CRISPY = False
+

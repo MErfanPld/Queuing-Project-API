@@ -1,7 +1,18 @@
 from django.conf import settings
 from django.db import models
 from decimal import Decimal
+import time
+from django.urls import reverse
+from django.utils.text import slugify
+
 from business.models import Service, Business
+
+
+def upload_package_image(instance, filename):
+    path = 'uploads/' + 'packages/' + 'img' + \
+        slugify(instance.name, allow_unicode=True)
+    name = str(time.time()) + '-' + str(instance.name) + '-' + filename
+    return path + '/' + name
 
 
 class Package(models.Model):
@@ -13,9 +24,9 @@ class Package(models.Model):
     desc = models.TextField(verbose_name="توضیحات", null=True, blank=True)
     total_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0, verbose_name="قیمت کل")
-    image = models.ImageField(verbose_name="تصویر", null=True, blank=True)
+    image = models.ImageField(upload_to=upload_package_image,verbose_name="تصویر", null=True, blank=True)
     media_files = models.FileField(
-        default=list, blank=True, verbose_name="تصاویر و ویدیوها")
+        default=list, blank=True, upload_to=upload_package_image,verbose_name="تصاویر و ویدیوها")
 
     class Meta:
         verbose_name = "پکیج"
