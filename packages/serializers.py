@@ -1,39 +1,51 @@
 from rest_framework import serializers
 
-from business.models import Service
-from .models import Package
-from business.serializers import ServiceSerializer
+from business.models import Business
+from .models import Package, Service
+from business.serializers import BusinessSerializer,ServiceSerializer
 
 class PackageSerializer(serializers.ModelSerializer):
-    services = serializers.PrimaryKeyRelatedField(
-        queryset=Service.objects.all(), many=True
+    business = BusinessSerializer(read_only=True)
+    business_id = serializers.PrimaryKeyRelatedField(
+        queryset=Business.objects.all(),
+        source='business',
+        write_only=True,
+        required=True
     )
-    business_name = serializers.CharField(
-        source='business.name', read_only=True
+    services = ServiceSerializer(many=True, read_only=True)
+    service_ids = serializers.PrimaryKeyRelatedField(
+        queryset=Service.objects.all(),
+        source='services',
+        many=True,
+        write_only=True,
+        required=True
     )
-
+    
     class Meta:
         model = Package
         fields = [
             'id',
             'business',
-            'business_name',
+            'business_id',
             'name',
-            'services',
             'desc',
             'total_price',
             'image',
             'media_files',
+            'services',
+            'service_ids',
         ]
-        extra_kwargs = {
-            'business': {'write_only': True},
-            'total_price': {'read_only': True},
-        }
-
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def validate_service_ids(self, value):
+        if not value:
+            raise serializers.ValidationError("حداقل یک سرویس باید انتخاب شود.")
+        return value
+    
     def to_representation(self, instance):
-        rep = super().to_representation(instance)
+        representation = super().to_representation(instance)
         if instance.image:
-            rep['image'] = instance.image.url
-        if instance.media_files:
-            rep['media_files'] = instance.media_files.url
-        return rep
+            representation['image'] = instance.image.url
+        else:
+            representation['image'] = None
+        return representation

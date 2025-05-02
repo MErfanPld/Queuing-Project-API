@@ -14,7 +14,6 @@ def upload_package_image(instance, filename):
     name = str(time.time()) + '-' + str(instance.name) + '-' + filename
     return path + '/' + name
 
-
 class Package(models.Model):
     business = models.ForeignKey(
         Business, on_delete=models.CASCADE, related_name='packages', verbose_name="کسب‌وکار")
@@ -24,9 +23,8 @@ class Package(models.Model):
     desc = models.TextField(verbose_name="توضیحات", null=True, blank=True)
     total_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0, verbose_name="قیمت کل")
-    image = models.ImageField(upload_to=upload_package_image,verbose_name="تصویر", null=True, blank=True)
-    media_files = models.FileField(
-        default=list, blank=True, upload_to=upload_package_image,verbose_name="تصاویر و ویدیوها")
+    image = models.ImageField(upload_to=upload_package_image, verbose_name="تصویر", null=True, blank=True)
+    media_files = models.FileField(blank=True, null=True, upload_to=upload_package_image, verbose_name="تصاویر و ویدیوها")
 
     class Meta:
         verbose_name = "پکیج"
@@ -34,18 +32,6 @@ class Package(models.Model):
 
     def __str__(self):
         return self.name
-
-    def calculate_total_price(self):
-        """محاسبه قیمت کل پکیج بر اساس سرویس‌های انتخاب شده"""
-        total = sum(service.price for service in self.services.all())
-        return Decimal(total)
-
-    def save(self, *args, **kwargs):
-        """ابتدا شیء را ذخیره کرده و سپس مقدار `total_price` را محاسبه و ذخیره می‌کنیم"""
-        super().save(*args, **kwargs)
-        self.total_price = self.calculate_total_price()
-        super().save(update_fields=['total_price'])
-
 
 
 class PackageReview(models.Model):

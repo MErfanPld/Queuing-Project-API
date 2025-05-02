@@ -1,46 +1,70 @@
-from rest_framework import generics, permissions, filters
-
-# from packages.filters import PackageFilter
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action
 from .models import Package
 from .serializers import PackageSerializer
-from django_filters.rest_framework import DjangoFilterBackend
-from business.models import Business
+from business.models import Business,Service
 
-
-class PackageListCreateAPIView(generics.ListCreateAPIView):
+class PackageViewSet(viewsets.ModelViewSet):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['business']
-    search_fields = ['name', 'desc']
-    ordering_fields = ['name', 'total_price']
-
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        business_id = self.request.query_params.get('business_id')
+        
+        if business_id:
+            queryset = queryset.filter(business_id=business_id)
+        
+        return queryset
+    
     def perform_create(self, serializer):
-        business = serializer.validated_data.get('business')
+        business_id = serializer.validated_data['business'].id
+        business = Business.objects.get(pk=business_id)
+        
         if business.owner != self.request.user:
-            raise PermissionDenied("شما مجاز به ایجاد پکیج برای این کسب‌وکار نیستید.")
-        package = serializer.save()
-        # بعد از ذخیره، قیمت کل رو حساب کن
-        package.total_price = package.calculate_total_price()
-        package.save(update_fields=['total_price'])
-
-class PackageRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Package.objects.all()
-    serializer_class = PackageSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    def perform_update(self, serializer):
-        instance = self.get_object()
-        if instance.business.owner != self.request.user:
-            raise PermissionDenied("شما مجاز به ویرایش این پکیج نیستید.")
-        package = serializer.save()
-        # بعد از ویرایش، قیمت کل رو دوباره حساب کن
-        package.total_price = package.calculate_total_price()
-        package.save(update_fields=['total_price'])
-
-    def perform_destroy(self, instance):
-        if instance.business.owner != self.request.user:
-            raise PermissionDenied("شما مجاز به حذف این پکیج نیستید.")
-        instance.delete()
-
+            raise PermissionDenied("شما صاحب این کسب‌وکار نیستید.")
+        
+        serializer.save()
+    
+    @action(detail=True, methods=['post'])
+    def add_services(self, request, pk=None):
+        package = self.get_object()
+        service_ids = request.data.get('service_ids', [])
+        
+        if not service_ids:
+            return Response(
+                {"detail": "سرویس‌ها باید ارسال شوند."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        services = Service.objects.filter(id__in=service_ids)
+        package.services.add(*services)
+        package.save()  # This will trigger total_price recalculation
+        
+        return Response(
+            PackageSerializer(package).data,
+            status=status.HTTP_200_OK
+        )
+    
+    @action(detail=True, methods=['post'])
+    def remove_services(self, request, pk=None):
+        package = self.get_object()
+        service_ids = request.data.get('service_ids', [])
+        
+        if not service_ids:
+            return Response(
+                {"detail": "سرویس‌ها باید ارسال شوند."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        services = Service.objects.filter(id__in=service_ids)
+        package.services.remove(*services)
+        package.save()  # This will trigger total_price recalculation
+        
+        return Response(
+            PackageSerializer(package).data,
+            status=status.HTTP_200_OK
+        )
