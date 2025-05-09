@@ -31,7 +31,7 @@ class PackageSerializer(serializers.ModelSerializer):
             'desc',
             'total_price',
             'image',
-            'media_files',
+            # 'media_files',
             'services',
             'service_ids',
         ]

@@ -1,29 +1,15 @@
-import json
 import time
-import requests
 from django.db import models
-from django.contrib.auth.models import AbstractUser, AbstractBaseUser
-from django.utils import timezone
-from django.utils.crypto import get_random_string
-from django.conf.urls.static import static
-from django.contrib.auth.models import PermissionsMixin
-from django.utils.translation import gettext_lazy as _
-from django.core.exceptions import ValidationError
-from acl.permissions import PERMISSIONS
-from extenstions.utils import jalali_converter
-from utils.validator import mobile_regex, mobile_validator
-from .managers import UserManager
-from django.conf import settings
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.text import slugify
+from .managers import UserManager
+from utils.validator import mobile_validator
 
-
-# Create your models here.
-
-
+# تابع بارگذاری تصویر
 def upload_image(instance, filename):
     path = 'uploads/' + 'users/' + \
-           slugify(instance.email, allow_unicode=True)
-    name = str(time.time()) + '-' + str(instance.email) + '-' + filename
+           slugify(instance.phone_number, allow_unicode=True)
+    name = str(time.time()) + '-' + str(instance.phone_number) + '-' + filename
     return path + '/' + name
 
 
@@ -32,7 +18,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=100, verbose_name="نام خانوادگی")
     phone_number = models.CharField(
         max_length=11, unique=True, verbose_name="شماره تلفن")
-    email = models.EmailField(('ایمیل'), null=True, blank=True, unique=True)
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="تاریخ ثبت")
     updated_at = models.DateTimeField(
@@ -42,12 +27,12 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(('فعال'), default=True)
     is_staff = models.BooleanField(('کارمند'), default=False)
     image = models.ImageField(
-        ('تصویر'), upload_to='uploads/', null=True, blank=True)
+        ('تصویر'), upload_to=upload_image, null=True, blank=True)
 
     objects = UserManager()
 
     USERNAME_FIELD = 'phone_number'
-    REQUIRED_FIELDS = ['email']
+    REQUIRED_FIELDS = []  # حذف ایمیل از فیلدهای مورد نیاز
 
     class Meta:
         verbose_name = 'کاربر'
@@ -68,6 +53,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                 str(self.phone_number)[:11]
             )
 
+        # بررسی تکراری بودن شماره تلفن
         if self.phone_number:
             qs = User.objects.filter(
                 phone_number=self.phone_number
@@ -80,18 +66,6 @@ class User(AbstractBaseUser, PermissionsMixin):
                     code="mobile"
                 )
 
-        if self.email:
-            qs = User.objects.filter(
-                email=self.email
-            )
-            if self.pk:
-                qs = qs.exclude(id=self.pk)
-            if qs.exists():
-                raise ValidationError(
-                    'ایمیل تکراری است و برای کاربر دیگری استفاده شده است!',
-                    code="email"
-                )
-
         return super().save(*args, **kwargs)
 
     def get_phone(self):
@@ -101,7 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def full_name(self):
         if self.first_name and self.last_name:
             return f"{self.first_name} {self.last_name}"
-        return self.email or '---'
+        return self.phone_number or '---'
 
     def user_role(self):
         return self.role if hasattr(self, 'role') else None

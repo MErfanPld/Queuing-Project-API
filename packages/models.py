@@ -24,7 +24,7 @@ class Package(models.Model):
     total_price = models.DecimalField(
         max_digits=10, decimal_places=2, default=0, verbose_name="قیمت کل")
     image = models.ImageField(upload_to=upload_package_image, verbose_name="تصویر", null=True, blank=True)
-    media_files = models.FileField(blank=True, null=True, upload_to=upload_package_image, verbose_name="تصاویر و ویدیوها")
+    # media_files = models.FileField(blank=True, null=True, upload_to=upload_package_image, verbose_name="تصاویر و ویدیوها")
 
     class Meta:
         verbose_name = "پکیج"
