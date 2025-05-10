@@ -10,6 +10,8 @@ class PackageViewSet(viewsets.ModelViewSet):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
     permission_classes = [IsAuthenticated]
+    permissions = ['packages_list', 'packages_create',"packages_edit", 'packages_delete']
+
     
     def get_queryset(self):
         queryset = super().get_queryset()

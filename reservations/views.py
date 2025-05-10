@@ -12,6 +12,7 @@ from django.db import transaction
 class AppointmentListCreateView(generics.ListCreateAPIView):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]  
+    permissions = ['reservations_list','reservations_create']
 
     def get_queryset(self):
         user = self.request.user
@@ -22,6 +23,7 @@ class AppointmentListCreateView(generics.ListCreateAPIView):
 class AppointmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]
+    permissions = ['reservations_edit','reservations_delete']
 
     def get_queryset(self):
         user = self.request.user

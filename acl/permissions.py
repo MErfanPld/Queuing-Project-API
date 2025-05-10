@@ -152,20 +152,20 @@ BUSINESS_PERMISSIONS = {
 PERMISSIONS.append(BUSINESS_PERMISSIONS)
 
 ######################################################################
-GET_AVAILABLE_PERMISSIONS = {
-    'title': 'دسترسی ساعت‌های در دسترس ها',
-    'permissions': [
-        {'name': 'لیست ساعت‌های در دسترس ها', 'code': 'get_available_list',
-            'description': 'دسترسی لیست ساعت‌های در دسترس ها'},
-        {'name': 'افزودن ساعت‌های در دسترس ها', 'code': 'get_available_create',
-         'description': 'دسترسی ساخت ساعت‌های در دسترس ها جدید'},
-        {'name': 'ویرایش ساعت‌های در دسترس ها', 'code': 'get_available_edit',
-            'description': 'دسترسی ویرایش ساعت‌های در دسترس ها'},
-        {'name': 'حذف ساعت‌های در دسترس ها', 'code': 'get_available_delete',
-            'description': 'دسترسی حذف ساعت‌های در دسترس ها'},
-    ]
-}
-PERMISSIONS.append(GET_AVAILABLE_PERMISSIONS)
+# GET_AVAILABLE_PERMISSIONS = {
+#     'title': 'دسترسی ساعت‌های در دسترس ها',
+#     'permissions': [
+#         {'name': 'لیست ساعت‌های در دسترس ها', 'code': 'get_available_list',
+#             'description': 'دسترسی لیست ساعت‌های در دسترس ها'},
+#         {'name': 'افزودن ساعت‌های در دسترس ها', 'code': 'get_available_create',
+#          'description': 'دسترسی ساخت ساعت‌های در دسترس ها جدید'},
+#         {'name': 'ویرایش ساعت‌های در دسترس ها', 'code': 'get_available_edit',
+#             'description': 'دسترسی ویرایش ساعت‌های در دسترس ها'},
+#         {'name': 'حذف ساعت‌های در دسترس ها', 'code': 'get_available_delete',
+#             'description': 'دسترسی حذف ساعت‌های در دسترس ها'},
+#     ]
+# }
+# PERMISSIONS.append(GET_AVAILABLE_PERMISSIONS)
 
 ######################################################################
 WORKINGHOURS_PERMISSIONS = {
