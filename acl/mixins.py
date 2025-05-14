@@ -5,50 +5,49 @@ from django.shortcuts import redirect
 from django.utils import timezone
 from django.urls import reverse_lazy
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
 # from Auth.models import Code
 
-
-class PermissionMixin(object):
+class PermissionMixin(APIView):
+    permission_classes = [IsAuthenticated]
     user = None
     permissions = []
-    redirect_url = reverse_lazy('login')
 
-    def get_redirect_url(self):
-        # Check if redirect_url is set on request GET param
-        self.redirect_url += '?redirect_url={}'.format(self.request.path)
-        return self.redirect_url
+    def check_permissions(self, request):
+        self.user = request.user
 
-    def dispatch(self, *args, **kwargs):
-        self.user = self.request.user
-
-        # Then check if the user has correct type
-        if not self.user.is_authenticated:
-            return HttpResponseRedirect(self.get_redirect_url())
-
-        # Then check if user is active or idk ex: shop is active or ...
-        if not self.check_active():
-            return HttpResponseForbidden()
-
-        # Authorization checks here
-        if not self.check_permissions():
-            return HttpResponseForbidden()
-
-        return super().dispatch(*args, **kwargs)
-
-    def check_permissions(self):
+        # Superuser bypass
         if self.user.is_superuser:
             return True
 
-        for permission in self.permissions:
-            if any(permission in p for p in self.user.permissions):
-                return True
-
+        # Staff users bypass
         if self.user.is_staff:
             return True
+
+        # Custom permissions check
+        if hasattr(self.user, 'permissions'):
+            for permission in self.permissions:
+                if permission in self.user.permissions:
+                    return True
+
         return False
 
-    def check_active(self):
+    def check_active(self, request):
         return self.user.is_active
+
+    def handle_request(self, request, *args, **kwargs):
+        # Check if user is active
+        if not self.check_active(request):
+            return Response({'detail': 'Account is inactive.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check permissions
+        if not self.check_permissions(request):
+            return Response({'detail': 'You do not have permission to access this resource.'}, status=status.HTTP_403_FORBIDDEN)
+
+        return super().dispatch(request, *args, **kwargs)
 
 
 class SuperUserRequiredMixin(LoginRequiredMixin, UserPassesTestMixin):

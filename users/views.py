@@ -6,13 +6,15 @@ from rest_framework import generics
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
+
+from acl.mixins import PermissionMixin
 from .serializers import *
 from .models import User
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-class UserProfileView(RetrieveAPIView):
+class UserProfileView(PermissionMixin,RetrieveAPIView):
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
 
@@ -20,7 +22,7 @@ class UserProfileView(RetrieveAPIView):
         return self.request.user
 
 
-class UserProfileUpdateView(UpdateAPIView):
+class UserProfileUpdateView(PermissionMixin,UpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -32,7 +34,7 @@ class UserProfileUpdateView(UpdateAPIView):
         serializer.save()
 
 
-class UserListView(generics.ListCreateAPIView):
+class UserListView(PermissionMixin,generics.ListCreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
@@ -54,7 +56,7 @@ class UserListView(generics.ListCreateAPIView):
         return super().post(request)
 
 
-class UserCreateView(APIView):
+class UserCreateView(PermissionMixin,APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -70,7 +72,7 @@ class UserCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserDetailView(generics.RetrieveAPIView):
+class UserDetailView(PermissionMixin,generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
@@ -83,7 +85,7 @@ class UserDetailView(generics.RetrieveAPIView):
         return super().get(request, pk)
 
 
-class UserUpdateView(APIView):
+class UserUpdateView(PermissionMixin,APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -104,7 +106,7 @@ class UserUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UserDeleteView(APIView):
+class UserDeleteView(PermissionMixin,APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(

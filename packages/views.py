@@ -2,11 +2,13 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
+
+from acl.mixins import PermissionMixin
 from .models import Package
 from .serializers import PackageSerializer
 from business.models import Business,Service
 
-class PackageViewSet(viewsets.ModelViewSet):
+class PackageViewSet(PermissionMixin,viewsets.ModelViewSet):
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
     permission_classes = [IsAuthenticated]

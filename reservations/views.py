@@ -1,4 +1,6 @@
 from rest_framework import generics, status
+
+from acl.mixins import PermissionMixin
 from .models import Appointment, AvailableTimeSlot
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -9,7 +11,7 @@ from django.db import transaction
 
 
 # ============================== Appointment CRUD ==============================
-class AppointmentListCreateView(generics.ListCreateAPIView):
+class AppointmentListCreateView(PermissionMixin,generics.ListCreateAPIView):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]  
     permissions = ['reservations_list','reservations_create']
@@ -20,7 +22,7 @@ class AppointmentListCreateView(generics.ListCreateAPIView):
             return Appointment.objects.all()
         return Appointment.objects.filter(user=user)  
 
-class AppointmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class AppointmentRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AppointmentSerializer
     permission_classes = [IsAuthenticated]
     permissions = ['reservations_edit','reservations_delete']
