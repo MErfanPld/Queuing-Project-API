@@ -198,8 +198,8 @@ REST_FRAMEWORK = {
 from datetime import timedelta
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),  # مدت اعتبار توکن
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # مدت اعتبار رفرش توکن
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),  # مدت اعتبار توکن
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=10),  # مدت اعتبار رفرش توکن
     'AUTH_HEADER_TYPES': ('Bearer',),  # نوع توکن
 }
 

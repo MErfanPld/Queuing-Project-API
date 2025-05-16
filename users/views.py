@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 
 from acl.mixins import PermissionMixin
+from acl.rest_mixin import RestPermissionMixin
 from .serializers import *
 from .models import User
 from django.contrib.auth import get_user_model
@@ -35,9 +36,9 @@ class UserProfileUpdateView(PermissionMixin,UpdateAPIView):
 
 
 class UserListView(PermissionMixin,generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=UserSerializer,
@@ -57,7 +58,8 @@ class UserListView(PermissionMixin,generics.ListCreateAPIView):
 
 
 class UserCreateView(PermissionMixin,APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permissions = ['user_create']
 
     @extend_schema(
         request=UserCreateSerializer,
@@ -73,9 +75,9 @@ class UserCreateView(PermissionMixin,APIView):
 
 
 class UserDetailView(PermissionMixin,generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         responses={200: UserSerializer},
@@ -86,8 +88,9 @@ class UserDetailView(PermissionMixin,generics.RetrieveAPIView):
 
 
 class UserUpdateView(PermissionMixin,APIView):
-    permission_classes = [IsAuthenticated]
-
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permissions = ['user_edit']
+    
     @extend_schema(
         request=UserUpdateSerializer,
         responses={200: UserUpdateSerializer},
@@ -107,7 +110,8 @@ class UserUpdateView(PermissionMixin,APIView):
 
 
 class UserDeleteView(PermissionMixin,APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permissions = ['user_delete']
 
     @extend_schema(
         responses={204: None},

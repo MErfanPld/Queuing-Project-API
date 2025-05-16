@@ -4,7 +4,7 @@ from acl.mixins import PermissionMixin
 from acl.rest_mixin import RestPermissionMixin
 from .models import Business, Employee, Service
 from .serializers import *
-from .permissions import *
+from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
 
@@ -12,15 +12,15 @@ from .permissions import *
 #? ============================= Business CRUD =============================
 
 
-class BusinessListCreateView(PermissionMixin,generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated, RestPermissionMixin]
+class BusinessListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['business_list','business_create']
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
 
 
-class BusinessRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated, RestPermissionMixin]
+class BusinessRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['business_edit','business_delete']
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
@@ -28,41 +28,41 @@ class BusinessRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateD
 
 #? ============================= Employee CRUD =============================
 
-class EmployeeListView(PermissionMixin,generics.ListAPIView):
-    permission_classes = [permissions.IsAuthenticated, RestPermissionMixin]
+class EmployeeListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['employee_list']
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
 
-class EmployeeCreateView(PermissionMixin,generics.CreateAPIView):
-    permission_classes = [permissions.IsAuthenticated, RestPermissionMixin]
+class EmployeeCreateView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['employee_create']
     queryset = Employee.objects.all()
     serializer_class = EmployeeCreateUpdateSerializer
 
-class EmployeeUpdateView(PermissionMixin,generics.UpdateAPIView):
-    permission_classes = [permissions.IsAuthenticated, RestPermissionMixin]
+class EmployeeUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['employee_edit']
     queryset = Employee.objects.all()
     serializer_class = EmployeeCreateUpdateSerializer
 
-class EmployeeRetrieveDestroyView(PermissionMixin,generics.RetrieveDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated, RestPermissionMixin]
+class EmployeeRetrieveDestroyView(generics.RetrieveDestroyAPIView):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['employee_delete']
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
 #? ============================= Services CRUD =============================
 
-class ServiceListCreateView(PermissionMixin,generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated, RestPermissionMixin]
+class ServiceListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['service_list','service_create']
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
 
-class ServiceRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated, RestPermissionMixin]
+class ServiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['service_edit','service_delete']
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer

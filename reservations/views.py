@@ -12,9 +12,8 @@ from django.db import transaction
 
 
 # ============================== Appointment CRUD ==============================
-class AppointmentListCreateView(PermissionMixin,generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated, RestPermissionMixin]
-    permissions = ['reservations_list','reservations_create']
+class AppointmentListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = AppointmentSerializer
 
     def get_queryset(self):
@@ -23,9 +22,8 @@ class AppointmentListCreateView(PermissionMixin,generics.ListCreateAPIView):
             return Appointment.objects.all()
         return Appointment.objects.filter(user=user)  
 
-class AppointmentRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated, RestPermissionMixin]
-    permissions = ['reservations_edit','reservations_delete']
+class AppointmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
     serializer_class = AppointmentSerializer
 
     def get_queryset(self):
