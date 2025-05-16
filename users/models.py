@@ -5,7 +5,6 @@ from django.utils.text import slugify
 from .managers import UserManager
 from utils.validator import mobile_validator
 
-# تابع بارگذاری تصویر
 def upload_image(instance, filename):
     path = 'uploads/' + 'users/' + \
            slugify(instance.phone_number, allow_unicode=True)
@@ -38,7 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'کاربر'
         verbose_name_plural = 'کاربران'
 
-    def __str__(self):
+    def str(self):
         return self.full_name
 
     def jcreated(self):
@@ -107,6 +106,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def permissions(self):
         if self.is_superuser:
+            from acl.permissions import PERMISSIONS
             return PERMISSIONS
         else:
             try:

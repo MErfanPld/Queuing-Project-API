@@ -4,15 +4,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import action
 
 from acl.mixins import PermissionMixin
+from acl.rest_mixin import RestPermissionMixin
 from .models import Package
 from .serializers import PackageSerializer
 from business.models import Business,Service
 
 class PackageViewSet(PermissionMixin,viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permissions = ['packages_list', 'packages_create',"packages_edit", 'packages_delete']
     queryset = Package.objects.all()
     serializer_class = PackageSerializer
-    permission_classes = [IsAuthenticated]
-    permissions = ['packages_list', 'packages_create',"packages_edit", 'packages_delete']
 
     
     def get_queryset(self):
