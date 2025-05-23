@@ -6,11 +6,10 @@ User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    email = serializers.EmailField(required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ('id', 'first_name', 'last_name', 'phone_number', 'email', 'password')
+        fields = ('id', 'first_name', 'last_name', 'phone_number', 'password')
         extra_kwargs = {
             'first_name': {'required': True},
             'last_name': {'required': True},
