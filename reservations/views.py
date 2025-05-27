@@ -1,14 +1,14 @@
 from rest_framework import generics, status
-
-from acl.mixins import PermissionMixin
-from acl.rest_mixin import RestPermissionMixin
-from .models import Appointment, AvailableTimeSlot
 from rest_framework.response import Response
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets
+from rest_framework.views import APIView
+from datetime import datetime, timedelta, time
+from drf_spectacular.utils import extend_schema
+
+from business.models import Employee, Service
+from .models import Appointment
 from .serializers import AppointmentSerializer
-from django.db import transaction
+
 
 
 # ============================== Appointment CRUD ==============================
@@ -31,4 +31,3 @@ class AppointmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView
         if user.is_superuser:
             return Appointment.objects.all()
         return Appointment.objects.filter(user=user)
-

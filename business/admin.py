@@ -6,3 +6,4 @@ from .models import *
 admin.site.register(Business)
 admin.site.register(Employee)
 admin.site.register(Service)
+admin.site.register(AvailableTimeSlot)

@@ -1,5 +1,7 @@
 from rest_framework import generics
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
 from acl.mixins import PermissionMixin
 from acl.rest_mixin import RestPermissionMixin
 from .models import Business, Employee, Service
@@ -67,3 +69,39 @@ class ServiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     
+
+#? ============================= Available Time Slot CRUD =============================
+class AvailableTimeSlotCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = AvailableTimeSlot.objects.all()
+    serializer_class = AvailableTimeSlotSerializer
+
+
+class AvailableTimeSlotDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = AvailableTimeSlot.objects.all()
+    serializer_class = AvailableTimeSlotSerializer
+    
+    
+class TimeSlotStatusUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = AvailableTimeSlot.objects.all()
+    serializer_class = TimeSlotStatusUpdateSerializer
+    
+    
+class AvailableTimeSlotListCreateView(generics.ListCreateAPIView):
+    serializer_class = AvailableTimeSlotSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        service_id = self.request.query_params.get('service_id')
+        date = self.request.query_params.get('date')
+
+        queryset = AvailableTimeSlot.objects.filter(is_available=True)
+
+        if service_id:
+            queryset = queryset.filter(service_id=service_id)
+        if date:
+            queryset = queryset.filter(date=date)
+
+        return queryset

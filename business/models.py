@@ -1,6 +1,8 @@
+import datetime
 from django.db import models
 from users.models import User
-from decimal import Decimal
+from datetime import datetime
+
 
 # Create your models here.
 
@@ -72,3 +74,19 @@ class Service(models.Model):
 
     def get_price(self):
         return self.price
+
+
+
+class AvailableTimeSlot(models.Model):
+    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='available_slots')
+    date = models.DateField(verbose_name="تاریخ")
+    start_time = models.TimeField(verbose_name="ساعت شروع")
+    is_available = models.BooleanField(default=True, verbose_name="فعال/غیرفعال")
+
+    class Meta:
+        unique_together = ('service', 'date', 'start_time')
+
+    @property
+    def end_time(self):
+        start_dt = datetime.combine(self.date, self.start_time)
+        return (start_dt + self.service.duration).time()

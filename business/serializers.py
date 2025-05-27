@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from users.serializers import UserSerializer
-from .models import Business, Employee, Service
+from .models import AvailableTimeSlot, Business, Employee, Service
 from users.models import User
 
 class BusinessSerializer(serializers.ModelSerializer):
@@ -69,3 +69,17 @@ class ServiceSerializer(serializers.ModelSerializer):
             'business',
             'employee'
         ]
+
+
+class AvailableTimeSlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AvailableTimeSlot
+        fields = '__all__'
+
+        
+class TimeSlotStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AvailableTimeSlot
+        fields = ['is_available']
+        
+
