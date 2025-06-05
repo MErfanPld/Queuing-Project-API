@@ -4,4 +4,4 @@ from .models import *
 # Register your models here.
 admin.site.register(Wallet)
 admin.site.register(Transaction)
-admin.site.register(UserWithdrawalRequests)
+admin.site.register(Payment)

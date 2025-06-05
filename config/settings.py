@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'drf_spectacular',
     'corsheaders',
-
+    'sslserver',
 
     # Apps
     'users',
@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'reports',
     'working_hours',
     'packages',
+    'dashboard',
 ]
 
 MIDDLEWARE = [

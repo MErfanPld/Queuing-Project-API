@@ -3,7 +3,8 @@ from users.models import User
 from business.models import AvailableTimeSlot, Service, Business
 from extenstions.utils import jalali_converter
 from business.models import Employee
-
+from django.db import transaction
+from payments.models import Transaction
 
 class Appointment(models.Model):
     STATUS_CHOICES = [
@@ -29,8 +30,40 @@ class Appointment(models.Model):
         verbose_name_plural = "نوبت‌ها"
 
     def __str__(self):
-        return f"{self.user} - {self.service} در {self.date} ساعت {self.time}"
+        return f"{self.user} - {self.service} - {self.status}"
 
     @property
     def get_status(self):
         return dict(self.STATUS_CHOICES).get(self.status, '')
+
+    def pay_with_wallet(self):
+        from django.db import transaction
+        from django.core.exceptions import ValidationError
+        from payments.models import Transaction
+
+        wallet = self.user.wallet  # فرض: کیف پول از قبل ایجاد شده
+
+        from decimal import Decimal
+        cost = self.service.price  # فرض: مدل Service فیلدی به نام price دارد
+
+        if wallet.balance < cost:
+            raise ValidationError("موجودی کیف پول کافی نیست.")
+
+        with transaction.atomic():
+            wallet = wallet.__class__.objects.select_for_update().get(pk=wallet.pk)
+
+            if wallet.balance < cost:
+                raise ValidationError("موجودی کیف پول کافی نیست.")
+
+            wallet.decrease(cost)
+
+            Transaction.objects.create(
+                wallet=wallet,
+                amount=cost,
+                type='WITHDRAW',
+                reservation=self,
+                status='SUCCESS'
+            )
+
+            self.status = 'confirmed'
+            self.save()
