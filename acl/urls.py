@@ -11,7 +11,7 @@ router.register('permissions', views.PermissionsAPI)
 # router.register('role_user', views.UserRoleAPI)
 
 urlpatterns = [
-    # path('', include(router.urls)),
+    path('', include(router.urls)),
     path('user-permissions/', views.UserPermissionListView.as_view(), name='user-permissions-list'),
     path('user-permissions/create/', views.UserPermissionCreateView.as_view(), name='user-permissions-create'),
     path('user-permissions/<int:pk>/', views.UserPermissionDetailView.as_view(), name='user-permissions-detail'),
