@@ -47,7 +47,7 @@ class UserPermissionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = UserPermission
-        fields = ['user', 'permissions', 'permissions_display']
+        fields = ['user', 'id','permissions', 'permissions_display']
 
     def get_permissions_display(self, obj):
         return [perm.name for perm in obj.permissions.all()]
