@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 from rest_framework.exceptions import ValidationError
 
+from users.serializers import UserSerializer
+
 from .models import *
 
 
@@ -23,19 +25,35 @@ class Role_UserSerializer(ModelSerializer):
         fields = '__all__'
         depth = 1
 
+class SimpleUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'phone_number', 'first_name', 'last_name']
 
 class UserWithPermissionsSerializer(serializers.ModelSerializer):
+    id_user_permission = serializers.IntegerField(source='id', read_only=True)
+    users = serializers.SerializerMethodField()
     permissions = serializers.SerializerMethodField()
 
     class Meta:
-        model = User
-        fields = ['id', 'phone_number', 'first_name','last_name','permissions']
+        model = UserPermission
+        fields = ['id_user_permission', 'users', 'permissions']
+
+    def get_users(self, obj):
+        return {
+            "name": f"{obj.user.first_name} {obj.user.last_name}",
+            "phone_number":f"{obj.user.phone_number}"
+        }
 
     def get_permissions(self, obj):
-        user_permission = UserPermission.objects.filter(user=obj).first()
-        if user_permission:
-            return [{'id': perm.id, 'name': perm.name, 'code': perm.code} for perm in user_permission.permissions.all()]
-        return []
+        return [
+            {
+                "id": perm.id,
+                "name": perm.name,
+                "code": perm.code
+            }
+            for perm in obj.permissions.all()
+        ]
 
 
 

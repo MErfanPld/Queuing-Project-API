@@ -31,7 +31,7 @@ class UserPermissionListView(ListAPIView):
     serializer_class = UserWithPermissionsSerializer
 
     def get_queryset(self):
-        return User.objects.all()
+        return UserPermission.objects.select_related('user').prefetch_related('permissions')
 
 
 class UserPermissionCreateView(CreateAPIView):
