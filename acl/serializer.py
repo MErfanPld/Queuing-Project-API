@@ -68,8 +68,11 @@ class UserPermissionSerializer(serializers.ModelSerializer):
         fields = ['user', 'id','permissions', 'permissions_display']
 
     def get_permissions_display(self, obj):
-        return [perm.name for perm in obj.permissions.all()]
-
+        return [
+            {"name": perm.name, "code": perm.code}
+            for perm in obj.permissions.all()
+        ]
+        
     def create(self, validated_data):
         permissions_data = validated_data.pop('permissions', None)
         user = validated_data.get('user')
