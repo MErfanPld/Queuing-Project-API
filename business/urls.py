@@ -10,7 +10,8 @@ urlpatterns = [
     path('employees/update/<int:pk>/', EmployeeUpdateView.as_view(), name='employee-update'),
     path('employees/<int:pk>/', EmployeeRetrieveDestroyView.as_view(), name='employee-detail'),
     
-    path('services/', ServiceListCreateView.as_view(), name='service-list-create'),
+    path('services/', ServiceListView.as_view(), name='service-list'),
+    path('services/', ServiceCreateView.as_view(), name='service-create'),
     path('services/<int:pk>/', ServiceRetrieveUpdateDestroyView.as_view(), name='service-detail'),
     
     path('slots/', AvailableTimeSlotCreateView.as_view(), name='slot-list-create'),
