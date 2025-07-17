@@ -31,7 +31,7 @@ class BusinessRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 #? ============================= Employee CRUD =============================
 
 class EmployeeListView(generics.ListAPIView):
-    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permission_classes = [IsAuthenticated]
     permissions = ['employee_list']
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
@@ -70,7 +70,7 @@ class ServiceListView(generics.ListAPIView):
     permissions = ['service_list']  
 
 class ServiceCreateView(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated,RestPermissionMixin]
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     permissions = ['service_create']
