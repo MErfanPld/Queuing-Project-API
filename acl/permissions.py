@@ -200,6 +200,21 @@ PACKAGE_PERMISSIONS = {
 }
 PERMISSIONS.append(PACKAGE_PERMISSIONS)
 
+######################################################################
+TIME_SLOT_PERMISSIONS = {
+    'title': 'دسترسی ساعت رزرو ها',
+    'permissions': [
+        {'name': 'لیست ساعت رزرو ها', 'code': 'time_slot_list',
+            'description': 'دسترسی لیست ساعت رزرو ها'},
+        {'name': 'افزودن ساعت رزرو ها', 'code': 'time_slot_create',
+         'description': 'دسترسی ساخت ساعت رزرو ها جدید'},
+        {'name': 'ویرایش ساعت رزرو ها', 'code': 'time_slot_edit',
+            'description': 'دسترسی ویرایش ساعت رزرو ها'},
+        {'name': 'حذف ساعت رزرو ها', 'code': 'time_slot_delete',
+            'description': 'دسترسی حذف ساعت رزرو ها'},
+    ]
+}
+PERMISSIONS.append(PACKAGE_PERMISSIONS)
 
 ######################################################################
 

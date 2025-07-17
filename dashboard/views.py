@@ -1,16 +1,28 @@
-from rest_framework.generics import ListAPIView
-from rest_framework.permissions import IsAdminUser
-from django.utils import timezone
+from requests import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from payments.models import Payment
+from payments.serializers import PaymentSerializer
 from reservations.models import Appointment
 from reservations.serializers import AppointmentSerializer
-from .pagination import DshboardPagination
-from datetime import date
 
-class TodayAppointmentsDashboardView(ListAPIView):
-    serializer_class = AppointmentSerializer
-    permission_classes = [IsAdminUser]
-    pagination_class = DshboardPagination
+class DashboardView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        today = date.today()
-        return Appointment.objects.filter(time_slot__date=today).order_by('-time_slot__start_time')
+    def get(self, request):
+        user = request.user
+
+        if user.is_superuser or getattr(user, 'is_owner', False):
+            appointments = Appointment.objects.all()
+            payments = Payment.objects.all()
+        else:
+            appointments = Appointment.objects.filter(user=user)
+            payments = Payment.objects.filter(user=user)
+
+        appointment_data = AppointmentSerializer(appointments, many=True).data
+        payment_data = PaymentSerializer(payments, many=True).data
+
+        return Response({
+            'appointments': appointment_data,
+            'payments': payment_data
+        })

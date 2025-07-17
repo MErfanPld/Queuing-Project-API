@@ -84,14 +84,24 @@ class ServiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     
 
 #? ============================= Available Time Slot CRUD =============================
-class AvailableTimeSlotCreateView(generics.ListCreateAPIView):
+class AvailableTimeSlotListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
+    permissions = ['time_slot_list']
+    queryset = AvailableTimeSlot.objects.all()
+    serializer_class = AvailableTimeSlotSerializer
+
+
+class AvailableTimeSlotCreateView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated]
+    permissions = ['time_slot_create']
     queryset = AvailableTimeSlot.objects.all()
     serializer_class = AvailableTimeSlotSerializer
 
 
 class AvailableTimeSlotDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
+    permissions = ['time_slot_update', 'time_slot_delete']
+
     queryset = AvailableTimeSlot.objects.all()
     serializer_class = AvailableTimeSlotSerializer
     
@@ -105,6 +115,7 @@ class TimeSlotStatusUpdateView(generics.UpdateAPIView):
 class AvailableTimeSlotListCreateView(generics.ListCreateAPIView):
     serializer_class = AvailableTimeSlotSerializer
     permission_classes = [IsAuthenticated]
+
 
     def get_queryset(self):
         service_id = self.request.query_params.get('service_id')
