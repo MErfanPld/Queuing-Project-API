@@ -23,7 +23,7 @@ class DashboardView(APIView):
 
         if user.is_superuser or getattr(user, 'is_owner', False):
             # 🟦 داشبورد ادمین / مالک
-            appointments = Appointment.objects.all()
+            appointments = Appointment.objects.all().order_by('-id')
             payments = Payment.objects.all()
             users = User.objects.filter(is_active=True)
 
@@ -35,9 +35,12 @@ class DashboardView(APIView):
             latest_payments = PaymentSerializer(payments.order_by('-created_at')[:5], many=True).data
             new_users = users.order_by('-created_at')[:5].values('id', 'phone_number', 'created_at')
 
+            appointment_data = AppointmentSerializer(appointments, many=True).data
+
             return Response({
                 'type': 'admin',
-                'total_appointments': appointments.count(),
+                'total_appointments': len(appointment_data),
+                'appointments': appointment_data,
                 'today_appointments': today_appointments.count(),
                 'income': {
                     'today': today_income,
