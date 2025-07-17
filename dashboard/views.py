@@ -1,4 +1,4 @@
-from requests import Response
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from payments.models import Payment
@@ -22,7 +22,7 @@ class DashboardView(APIView):
         appointment_data = AppointmentSerializer(appointments, many=True).data
         payment_data = PaymentSerializer(payments, many=True).data
 
-        return Response({
+        return Response(data={
             'appointments': appointment_data,
             'payments': payment_data
         })
