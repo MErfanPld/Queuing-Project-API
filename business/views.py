@@ -58,13 +58,13 @@ class EmployeeRetrieveDestroyView(generics.RetrieveDestroyAPIView):
 #? ============================= Services CRUD =============================
 
 class ServiceListCreateView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permission_classes = [IsAuthenticated]
     permissions = ['service_list','service_create']
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
 
 class ServiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permission_classes = [IsAuthenticated]
     permissions = ['service_edit','service_delete']
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
