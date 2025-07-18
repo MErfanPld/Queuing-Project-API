@@ -11,11 +11,11 @@ urlpatterns = [
     path('employees/<int:pk>/', EmployeeRetrieveDestroyView.as_view(), name='employee-detail'),
     
     path('services/', ServiceListView.as_view(), name='service-list'),
-    path('services/', ServiceCreateView.as_view(), name='service-create'),
+    path('services/create/', ServiceCreateView.as_view(), name='service-create'),
     path('services/<int:pk>/', ServiceRetrieveUpdateDestroyView.as_view(), name='service-detail'),
     
     path('slots/', AvailableTimeSlotListView.as_view(), name='slot-list'),
-    path('slots/', AvailableTimeSlotCreateView.as_view(), name='slot-create'),
+    path('slots/create/', AvailableTimeSlotCreateView.as_view(), name='slot-create'),
     path('slots/<int:pk>/', AvailableTimeSlotDetailUpdateDeleteView.as_view(), name='slot-detail-update-delete'),
     path('slots/<int:pk>/status/', TimeSlotStatusUpdateView.as_view(), name='slot-status-update'),
     path('slots/by-date-post/', AvailableTimeSlotListCreateView.as_view(), name='slots-by-date-post'),
