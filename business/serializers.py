@@ -72,14 +72,22 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class AvailableTimeSlotSerializer(serializers.ModelSerializer):
+    start_time = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+
     class Meta:
         model = AvailableTimeSlot
-        fields = '__all__'
+        fields = ['id', 'service', 'date', 'start_time', 'end_time', 'is_available']
 
+    def get_start_time(self, obj):
+        return obj.start_time.strftime('%H:%M')
+
+    def get_end_time(self, obj):
+        return obj.end_time.strftime('%H:%M')
+        
         
 class TimeSlotStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = AvailableTimeSlot
         fields = ['is_available']
         
-

@@ -90,3 +90,4 @@ class AvailableTimeSlot(models.Model):
     def end_time(self):
         start_dt = datetime.combine(self.date, self.start_time)
         return (start_dt + self.service.duration).time()
+    

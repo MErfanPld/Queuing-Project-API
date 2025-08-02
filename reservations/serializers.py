@@ -48,6 +48,10 @@ class AppointmentSerializer(serializers.ModelSerializer):
         time_slot = validated_data.pop('time_slot_id')
         user = self.context['request'].user
 
+        if time_slot.is_available:
+            time_slot.is_available = False
+            time_slot.save()
+
         appointment = Appointment.objects.create(
             user=user,
             service=service,
