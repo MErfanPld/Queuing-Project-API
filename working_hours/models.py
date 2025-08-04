@@ -8,3 +8,7 @@ class WorkingHours(models.Model):
 
     def __str__(self):
         return f"{self.day} - {self.opening_time.strftime('%H:%M')} to {self.closing_time.strftime('%H:%M')}"
+
+    class Meta:
+        verbose_name = "ساعت کاری"
+        verbose_name_plural = "ساعت های کاری"

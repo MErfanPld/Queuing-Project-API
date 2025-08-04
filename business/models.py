@@ -85,7 +85,9 @@ class AvailableTimeSlot(models.Model):
 
     class Meta:
         unique_together = ('service', 'date', 'start_time')
-
+        verbose_name = "ساعت دردسترس"
+        verbose_name_plural = "ساعت های دردسترس"
+        
     @property
     def end_time(self):
         start_dt = datetime.combine(self.date, self.start_time)
