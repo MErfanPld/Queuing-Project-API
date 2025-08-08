@@ -72,9 +72,9 @@ class ServiceSerializer(serializers.ModelSerializer):
 
 
 class AvailableTimeSlotSerializer(serializers.ModelSerializer):
-    start_time = serializers.SerializerMethodField()
+    start_time = serializers.TimeField(format='%H:%M')
     end_time = serializers.SerializerMethodField()
-
+    
     class Meta:
         model = AvailableTimeSlot
         fields = ['id', 'service', 'date', 'start_time', 'end_time', 'is_available']

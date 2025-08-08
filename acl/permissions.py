@@ -214,7 +214,23 @@ TIME_SLOT_PERMISSIONS = {
             'description': 'دسترسی حذف ساعت رزرو ها'},
     ]
 }
-PERMISSIONS.append(PACKAGE_PERMISSIONS)
+PERMISSIONS.append(TIME_SLOT_PERMISSIONS)
+
+######################################################################
+SLIDER_PERMISSIONS = {
+    'title': 'دسترسی اسلایدر ها',
+    'permissions': [
+        {'name': 'لیست اسلایدر ها', 'code': 'slider_list',
+            'description': 'دسترسی لیست اسلایدر ها'},
+        {'name': 'افزودن اسلایدر ها', 'code': 'slider_create',
+         'description': 'دسترسی ساخت اسلایدر ها جدید'},
+        {'name': 'ویرایش اسلایدر ها', 'code': 'slider_edit',
+            'description': 'دسترسی ویرایش اسلایدر ها'},
+        {'name': 'حذف اسلایدر ها', 'code': 'slider_delete',
+            'description': 'دسترسی حذف اسلایدر ها'},
+    ]
+}
+PERMISSIONS.append(SLIDER_PERMISSIONS)
 
 ######################################################################
 
