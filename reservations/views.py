@@ -23,8 +23,7 @@ class AppointmentListCreateView(generics.ListCreateAPIView):
         return Appointment.objects.filter(user=user)
 
     def perform_create(self, serializer):
-        appointment = serializer.save(user=self.request.user)
-
+        appointment = serializer.save()
         slot = appointment.time_slot
         if slot.is_available:
             slot.is_available = False
