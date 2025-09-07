@@ -5,7 +5,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'phone_number',   'is_owner', 'is_active', 'is_staff',
+        fields = ['id', 'password','first_name', 'last_name', 'phone_number',   'is_owner', 'is_active', 'is_staff',
                   'image']
         read_only_fields = ['created_at', 'updated_at']
 
@@ -30,7 +30,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = "__all__"
+        exclude = ['password']
         
 
 class UserProfileSerializer(serializers.ModelSerializer):
