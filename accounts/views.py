@@ -1,3 +1,4 @@
+import random
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -7,6 +8,9 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiExample
+
+from accounts.models import OTP
+from accounts.utils import send_otp_sms
 from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer, ForgotPasswordSerializer
 from users.serializers import UserSerializer
 
@@ -135,3 +139,45 @@ class ForgotPasswordView(APIView):
             return Response({"detail": "لینک بازیابی به ایمیل شما ارسال شد."}, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# ============================= OTP CODE =============================
+
+class SendOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        phone_number = request.data.get("phone_number")
+        if not phone_number:
+            return Response({"error": "شماره تلفن الزامی است"}, status=400)
+
+        code = str(random.randint(100000, 999999))
+        OTP.objects.create(phone_number=phone_number, code=code)
+        send_otp_sms(phone_number, code)
+
+        return Response({"message": "کد ورود ارسال شد"})
+
+
+class VerifyOTPView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        phone_number = request.data.get("phone_number")
+        code = request.data.get("code")
+
+        try:
+            otp = OTP.objects.filter(phone_number=phone_number, code=code).latest("created_at")
+        except OTP.DoesNotExist:
+            return Response({"error": "کد اشتباه است"}, status=400)
+
+        if not otp.is_valid():
+            return Response({"error": "کد منقضی شده است"}, status=400)
+
+        user, created = User.objects.get_or_create(phone_number=phone_number)
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+            "user": UserSerializer(user).data,
+        })
