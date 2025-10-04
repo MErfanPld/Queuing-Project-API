@@ -4,6 +4,7 @@ from acl.mixins import PermissionMixin
 from .models import Slider
 from .serializers import SliderSerializer
 
+
 class SliderListCreateView(PermissionMixin,generics.ListCreateAPIView):
     queryset = Slider.objects.all()
     serializer_class = SliderSerializer
