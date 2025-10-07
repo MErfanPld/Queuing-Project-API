@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, time
 from drf_spectacular.utils import extend_schema
 
 from business.models import Employee, Service
+from reservations.utils import send_reservation_sms
 from .models import Appointment
 from .serializers import AppointmentSerializer
 
@@ -29,6 +30,13 @@ class AppointmentListCreateView(generics.ListCreateAPIView):
             slot.is_available = False
             slot.save()
 
+        # اطلاعات پیامک
+        phone = appointment.user.phone_number
+        name = appointment.user.first_name or "کاربر"
+        date = str(appointment.time_slot.date)
+        time = str(appointment.time_slot.start_time)
+
+        send_reservation_sms(phone, name, date, time)
 
 class AppointmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
@@ -39,3 +47,5 @@ class AppointmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView
         if user.is_superuser:
             return Appointment.objects.all()
         return Appointment.objects.filter(user=user)
+
+

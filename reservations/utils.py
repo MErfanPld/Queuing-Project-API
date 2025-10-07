@@ -1,12 +1,34 @@
-from melipayamak import Api
+import requests
 
-def send_sms(phone_number, message):
+API_KEY = "e891feaac0144f48b8fbb68e72451d93"  # Access Key از پنل
+PATTERN_CODE = "377065"                  # کد الگوی تایید شده
+SENDER = "50002710046083"                # شماره خط خدماتی شما
+SMS_URL = f"https://console.melipayamak.com/api/send/shared/{PATTERN_CODE}"
+
+
+def send_reservation_sms(phone_number, name, date, time):
+    """
+    ارسال پیامک رزرو از طریق وب‌سرویس خدماتی ملی پیامک
+    """
+    payload = {
+        "to": phone_number,
+        "input_data": [
+            {"0": name, "1": date, "2": time}  # مطابق شماره‌گذاری الگو
+        ]
+    }
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"AccessKey {API_KEY}"
+    }
+
     try:
-        username = "9912146083"  # نام کاربری پنل ملی پیامک
-        password = "g75c2"  # رمز عبور پنل ملی پیامک
-        api = Api(username, password)
-        sms = api.sms()
-        sender = "50002710046083"  # شماره خط اختصاصی
-        sms.send(phone_number, sender, message)
-    except Exception as e:
-        print("SMS Error:", e)
+        response = requests.post(SMS_URL, json=payload, headers=headers, timeout=10)
+        response.raise_for_status()
+        print("✅ پیامک ارسال شد:", response.json())
+        return response.json()
+    except requests.RequestException as e:
+        print("❌ خطا در ارسال پیامک:", e)
+        if e.response is not None:
+            print("📨 پاسخ سرور:", e.response.text)
+        return None

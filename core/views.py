@@ -1,14 +1,17 @@
 from rest_framework import generics, permissions
 
 from acl.mixins import PermissionMixin
+from acl.rest_mixin import RestPermissionMixin
 from .models import Slider
 from .serializers import SliderSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 class SliderListCreateView(PermissionMixin,generics.ListCreateAPIView):
     queryset = Slider.objects.all()
     serializer_class = SliderSerializer
-    permission_classes = [permissions.AllowAny]  
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permissions = ['slider_list', 'slider_create']
 
 class SliderRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     queryset = Slider.objects.all()
