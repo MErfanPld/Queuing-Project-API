@@ -11,7 +11,7 @@ class SliderListCreateView(PermissionMixin,generics.ListCreateAPIView):
     queryset = Slider.objects.all()
     serializer_class = SliderSerializer
     permission_classes = [IsAuthenticated, RestPermissionMixin]
-    permissions = ['slider_list', 'slider_create']
+    permissions = ['slider_create']
 
 class SliderRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     queryset = Slider.objects.all()
