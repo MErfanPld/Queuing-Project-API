@@ -7,17 +7,23 @@ from .serializers import SliderSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
+class SliderListView(generics.ListAPIView):
+    queryset = Slider.objects.filter(is_active=True)
+    serializer_class = SliderSerializer
+
+
 class SliderListCreateView(PermissionMixin,generics.ListCreateAPIView):
     queryset = Slider.objects.all()
     serializer_class = SliderSerializer
-    permission_classes = [IsAuthenticated, RestPermissionMixin]
-    permissions = ['slider_create']
+    permission_classes = [RestPermissionMixin]
+    permissions = ['slider_create','slider_list']
+
 
 class SliderRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     queryset = Slider.objects.all()
     serializer_class = SliderSerializer
-    permission_classes = [permissions.IsAdminUser]  
-
+    permission_classes = [RestPermissionMixin]  
+    permissions = ['slider_edit','slider_delete']  
 
 
 # from django.shortcuts import render, redirect

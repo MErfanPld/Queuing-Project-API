@@ -14,14 +14,14 @@ from rest_framework.permissions import IsAuthenticated
 #? ============================= Business CRUD =============================
 
 
-class BusinessListCreateView(generics.ListCreateAPIView):
+class BusinessListCreateView(PermissionMixin,generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['business_list','business_create']
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
 
 
-class BusinessRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class BusinessRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['business_edit','business_delete']
     queryset = Business.objects.all()
@@ -30,26 +30,26 @@ class BusinessRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
 
 #? ============================= Employee CRUD =============================
 
-class EmployeeListView(generics.ListAPIView):
+class EmployeeListView(PermissionMixin,generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     permissions = ['employee_list']
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
 
-class EmployeeCreateView(generics.CreateAPIView):
+class EmployeeCreateView(PermissionMixin,generics.CreateAPIView):
     permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['employee_create']
     queryset = Employee.objects.all()
     serializer_class = EmployeeCreateUpdateSerializer
 
-class EmployeeUpdateView(generics.UpdateAPIView):
+class EmployeeUpdateView(PermissionMixin,generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['employee_edit']
     queryset = Employee.objects.all()
     serializer_class = EmployeeCreateUpdateSerializer
 
-class EmployeeRetrieveDestroyView(generics.RetrieveDestroyAPIView):
+class EmployeeRetrieveDestroyView(PermissionMixin,generics.RetrieveDestroyAPIView):
     permission_classes = [IsAuthenticated, RestPermissionMixin]
     permissions = ['employee_delete']
     queryset = Employee.objects.all()
@@ -63,20 +63,20 @@ class EmployeeRetrieveDestroyView(generics.RetrieveDestroyAPIView):
 #     queryset = Service.objects.all()
 #     serializer_class = ServiceSerializer
 
-class ServiceListView(generics.ListAPIView):
+class ServiceListView(PermissionMixin,generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     permissions = ['service_list']  
 
-class ServiceCreateView(generics.CreateAPIView):
+class ServiceCreateView(PermissionMixin,generics.CreateAPIView):
     permission_classes = [IsAuthenticated,RestPermissionMixin]
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     permissions = ['service_create']
 
 
-class ServiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
+class ServiceRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     permissions = ['service_edit','service_delete']
     queryset = Service.objects.all()
@@ -84,21 +84,21 @@ class ServiceRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     
 
 #? ============================= Available Time Slot CRUD =============================
-class AvailableTimeSlotListView(generics.ListAPIView):
+class AvailableTimeSlotListView(PermissionMixin,generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     permissions = ['time_slot_list']
     queryset = AvailableTimeSlot.objects.all()
     serializer_class = AvailableTimeSlotSerializer
 
 
-class AvailableTimeSlotCreateView(generics.CreateAPIView):
+class AvailableTimeSlotCreateView(PermissionMixin,generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     permissions = ['time_slot_create']
     queryset = AvailableTimeSlot.objects.all()
     serializer_class = AvailableTimeSlotSerializer
 
 
-class AvailableTimeSlotDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIView):
+class AvailableTimeSlotDetailUpdateDeleteView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     permissions = ['time_slot_update', 'time_slot_delete']
 
@@ -106,13 +106,13 @@ class AvailableTimeSlotDetailUpdateDeleteView(generics.RetrieveUpdateDestroyAPIV
     serializer_class = AvailableTimeSlotSerializer
     
     
-class TimeSlotStatusUpdateView(generics.UpdateAPIView):
+class TimeSlotStatusUpdateView(PermissionMixin,generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     queryset = AvailableTimeSlot.objects.all()
     serializer_class = TimeSlotStatusUpdateSerializer
     
     
-class AvailableTimeSlotListCreateView(generics.ListCreateAPIView):
+class AvailableTimeSlotListCreateView(PermissionMixin,generics.ListCreateAPIView):
     serializer_class = AvailableTimeSlotSerializer
     permission_classes = [IsAuthenticated]
 

@@ -10,7 +10,7 @@ from .serializers import PackageSerializer
 from business.models import Business,Service
 
 
-class PackageListView(generics.ListAPIView):
+class PackageUserListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = PackageSerializer
 
@@ -21,6 +21,18 @@ class PackageListView(generics.ListAPIView):
             queryset = queryset.filter(business_id=business_id)
         return queryset
 
+
+class PackageListView(PermissionMixin,generics.ListAPIView):
+    permission_classes = [RestPermissionMixin]
+    permissions = ['packages_list']
+    serializer_class = PackageSerializer
+
+    def get_queryset(self):
+        queryset = Package.objects.all()
+        business_id = self.request.query_params.get('business_id')
+        if business_id:
+            queryset = queryset.filter(business_id=business_id)
+        return queryset
 
 class PackageCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated, RestPermissionMixin]
