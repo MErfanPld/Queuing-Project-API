@@ -233,6 +233,22 @@ SLIDER_PERMISSIONS = {
 PERMISSIONS.append(SLIDER_PERMISSIONS)
 
 ######################################################################
+NUM_CARD_PERMISSIONS = {
+    'title': 'دسترسی شماره کارت ها',
+    'permissions': [
+        {'name': 'لیست شماره کارت ها', 'code': 'num_card_list',
+            'description': 'دسترسی لیست شماره کارت ها'},
+        {'name': 'افزودن شماره کارت ها', 'code': 'num_card_create',
+         'description': 'دسترسی ساخت شماره کارت ها جدید'},
+        {'name': 'ویرایش شماره کارت ها', 'code': 'num_card_edit',
+            'description': 'دسترسی ویرایش شماره کارت ها'},
+        {'name': 'حذف شماره کارت ها', 'code': 'num_card_delete',
+            'description': 'دسترسی حذف شماره کارت ها'},
+    ]
+}
+PERMISSIONS.append(SLIDER_PERMISSIONS)
+
+######################################################################
 
 USER_PERMISSIONS_PERMISSIONS = {
     'title': 'دسترسی دسترسی کاربر ها',

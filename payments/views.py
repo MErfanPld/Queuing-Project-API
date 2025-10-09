@@ -2,13 +2,23 @@ import requests
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from acl.rest_mixin import RestPermissionMixin
 from payments.models import Wallet, Transaction
 from .serializers import WalletSerializer, TransactionSerializer
 from rest_framework import status
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
+from .models import ManualPayment
+from .serializers import ManualPaymentSerializer
+from django.db.models import Q
 from reservations.models import Appointment
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from rest_framework import generics, permissions
+from .models import NumbersCard
+from .serializers import NumbersCardSerializer
+
 
 class WalletView(APIView):
     permission_classes = [IsAuthenticated]
@@ -68,6 +78,72 @@ class PayAppointmentWithWalletAPIView(APIView):
         return Response({"message": "پرداخت با کیف پول موفقیت‌آمیز بود."})
     
     
+
+
+class NumbersCardListView(generics.ListAPIView):
+    queryset = NumbersCard.objects.filter(status=True)
+    serializer_class = NumbersCardSerializer
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permissions = ['num_card_list']
+
+class NumbersCardListCreateView(generics.ListCreateAPIView):
+    queryset = NumbersCard.objects.all()
+    serializer_class = NumbersCardSerializer
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permissions = ['num_card_list', 'num_card_create']
+
+class NumbersCardDetailView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = NumbersCard.objects.all()
+    serializer_class = NumbersCardSerializer
+    permission_classes = [IsAuthenticated, RestPermissionMixin]
+    permissions = ['num_card_edit','num_card_delete']
+    
+    
+    
+    
+class ManualPaymentListCreateView(generics.ListCreateAPIView):
+    serializer_class = ManualPaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return ManualPayment.objects.all()
+        return ManualPayment.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+
+class ManualPaymentDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ManualPaymentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser:
+            return ManualPayment.objects.all()
+        return ManualPayment.objects.filter(user=user)
+
+
+class ManualPaymentStatusUpdateView(APIView):
+    permission_classes = [permissions.IsAdminUser]  # فقط ادمین
+
+    def patch(self, request, pk):
+        payment = get_object_or_404(ManualPayment, pk=pk)
+        status_value = request.data.get("status")
+
+        if status_value not in ["pending", "approved", "rejected"]:
+            return Response({"error": "Invalid status value."}, status=status.HTTP_400_BAD_REQUEST)
+
+        payment.status = status_value
+        payment.save(update_fields=["status"])
+
+        return Response({
+            "message": "وضعیت پرداخت با موفقیت تغییر کرد.",
+            "payment": ManualPaymentSerializer(payment).data
+        })
+
     
     
     

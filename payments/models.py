@@ -2,6 +2,9 @@ from django.db import models
 from users.models import User
 from decimal import Decimal
 from django.core.exceptions import ValidationError
+from django.conf import settings
+from django.utils import timezone
+
 
 class Wallet(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -87,3 +90,29 @@ class Payment(models.Model):
 
     def __str__(self):
         return f'{self.user} | {self.status}'
+    
+    
+class NumbersCard(models.Model):
+    num_code = models.CharField(max_length=16)    
+    name_bank = models.CharField(max_length=50)
+    status = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'{self.name_bank} | {self.status}'
+    
+
+class ManualPayment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'در انتظار بررسی'),
+        ('approved', 'تأیید شده'),
+        ('rejected', 'رد شده'),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='manual_payments')
+    tracking_code = models.CharField(max_length=50, unique=True)
+    receipt_image = models.ImageField(upload_to='payment_receipts/', null=True, blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f'{self.user} | {self.tracking_code} | {self.status}'
