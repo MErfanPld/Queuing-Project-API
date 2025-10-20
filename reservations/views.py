@@ -24,19 +24,18 @@ class AppointmentListCreateView(generics.ListCreateAPIView):
         return Appointment.objects.filter(user=user)
 
     def perform_create(self, serializer):
+        # رزرو را ذخیره کن
         appointment = serializer.save()
-        slot = appointment.time_slot
-        if slot.is_available:
-            slot.is_available = False
-            slot.save()
 
-        # اطلاعات پیامک
+        # اطلاعات برای پیامک
         phone = appointment.user.phone_number
         name = appointment.user.first_name or "کاربر"
         date = str(appointment.time_slot.date)
         time = str(appointment.time_slot.start_time)
 
+        # ارسال پیامک رزرو موفق
         send_reservation_sms(phone, name, date, time)
+
 
 class AppointmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]

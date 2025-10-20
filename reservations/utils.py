@@ -1,34 +1,31 @@
 import requests
 
-API_KEY = "e891feaac0144f48b8fbb68e72451d93"  # Access Key از پنل
-PATTERN_CODE = "377065"                  # کد الگوی تایید شده
-SENDER = "50002710046083"                # شماره خط خدماتی شما
-SMS_URL = f"https://console.melipayamak.com/api/send/shared/{PATTERN_CODE}"
-
+API_KEY = "456a6b916ca64f24bb14b5ca310a97bc"  
+BODY_ID = 382582                             
 
 def send_reservation_sms(phone_number, name, date, time):
-    """
-    ارسال پیامک رزرو از طریق وب‌سرویس خدماتی ملی پیامک
-    """
-    payload = {
-        "to": phone_number,
-        "input_data": [
-            {"0": name, "1": date, "2": time}  # مطابق شماره‌گذاری الگو
-        ]
-    }
+    url = f"https://console.melipayamak.com/api/send/shared/{API_KEY}"
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"AccessKey {API_KEY}"
+    payload = {
+        "bodyId": BODY_ID,
+        "to": phone_number,
+        "args": [name, date, time]
     }
 
     try:
-        response = requests.post(SMS_URL, json=payload, headers=headers, timeout=10)
+        response = requests.post(url, json=payload, timeout=10)
         response.raise_for_status()
-        print("✅ پیامک ارسال شد:", response.json())
-        return response.json()
+
+        try:
+            data = response.json()
+        except ValueError:
+            data = {"raw_response": response.text}
+
+        print("✅ پیامک ارسال شد:", data)
+        return data
+
     except requests.RequestException as e:
         print("❌ خطا در ارسال پیامک:", e)
-        if e.response is not None:
+        if hasattr(e, 'response') and e.response is not None:
             print("📨 پاسخ سرور:", e.response.text)
         return None
