@@ -1,15 +1,17 @@
 import requests
 
-def send_otp_sms(phone_number, code):
-    api_key = "API_KEY_تو_اینجا"
-    url = "https://console.melipayamak.com/api/send/simple"
+API_KEY = "456a6b916ca64f24bb14b5ca310a97bc"
+BODY_ID = 386443 
+
+def send_sms(phone, code):
+    url = f"https://console.melipayamak.com/api/send/shared/{API_KEY}"
     payload = {
-        "from": "شماره_خط_ارسالی",
-        "to": phone_number,
-        "text": f"کد ورود شما: {code}",
+        "bodyId": BODY_ID,
+        "to": phone,
+        "args": [code]
     }
-    headers = {
-        "x-api-key": api_key,
-        "Content-Type": "application/json",
-    }
-    requests.post(url, json=payload, headers=headers)
+
+    response = requests.post(url, json=payload)
+    if response.status_code != 200:
+        raise Exception(f"SMS ارسال نشد: {response.text}")
+    return response.json()

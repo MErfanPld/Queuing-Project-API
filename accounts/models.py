@@ -1,14 +1,21 @@
-from django.db import models
 import random
+import datetime
+from django.db import models
 from django.utils import timezone
-from datetime import timedelta
+from django.conf import settings
 
-class OTP(models.Model):
-    phone_number = models.CharField(max_length=11)
+class PasswordResetCode(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     code = models.CharField(max_length=6)
     created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
 
     def is_valid(self):
-        from django.utils import timezone
-        from datetime import timedelta
-        return self.created_at >= timezone.now() - timedelta(minutes=2)
+        return timezone.now() < self.expires_at
+
+    @staticmethod
+    def generate_code(user):
+        PasswordResetCode.objects.filter(user=user).delete()
+        code = str(random.randint(10000, 99999))
+        expires = timezone.now() + datetime.timedelta(minutes=5)
+        return PasswordResetCode.objects.create(user=user, code=code, expires_at=expires)

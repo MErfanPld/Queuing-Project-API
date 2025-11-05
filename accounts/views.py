@@ -8,11 +8,11 @@ from rest_framework.permissions import AllowAny
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from drf_spectacular.utils import extend_schema, OpenApiExample
+from django.contrib.auth.hashers import make_password
 
-from accounts.models import OTP
-from accounts.utils import send_otp_sms
-from .serializers import LoginSerializer, RegisterSerializer, ChangePasswordSerializer, ForgotPasswordSerializer
+from .serializers import *
 from users.serializers import UserSerializer
+from .utils import send_sms
 
 User = get_user_model()
 
@@ -115,69 +115,41 @@ class ChangePasswordView(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class ForgotPasswordView(APIView):
-
-    @extend_schema(
-        request=ForgotPasswordSerializer,
-        responses={200: "لینک بازیابی به ایمیل شما ارسال شد.", 400: "کاربری با این ایمیل پیدا نشد."},
-        examples=[
-            OpenApiExample(
-                'مثال فراموشی پسورد',
-                value={'email': 'user@example.com'},
-                request_only=True,
-            )
-        ]
-    )
-    def post(self, request):
-        serializer = ForgotPasswordSerializer(data=request.data)
-
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-
-            # اینجا باید عملیات ارسال ایمیل یا لینک بازیابی انجام شود
-            return Response({"detail": "لینک بازیابی به ایمیل شما ارسال شد."}, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-# ============================= OTP CODE =============================
-
-class SendOTPView(APIView):
-    permission_classes = [AllowAny]
+class SendResetCodeView(generics.GenericAPIView):
+    serializer_class = SendResetCodeSerializer
 
     def post(self, request):
-        phone_number = request.data.get("phone_number")
-        if not phone_number:
-            return Response({"error": "شماره تلفن الزامی است"}, status=400)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
 
-        code = str(random.randint(100000, 999999))
-        OTP.objects.create(phone_number=phone_number, code=code)
-        send_otp_sms(phone_number, code)
-
-        return Response({"message": "کد ورود ارسال شد"})
+        reset_code = PasswordResetCode.generate_code(user)
+        send_sms(user.phone_number, reset_code.code)
+        return Response({"message": "کد تأیید ارسال شد."}, status=status.HTTP_200_OK)
 
 
-class VerifyOTPView(APIView):
-    permission_classes = [AllowAny]
+class VerifyResetCodeView(generics.GenericAPIView):
+    serializer_class = VerifyResetCodeSerializer
 
     def post(self, request):
-        phone_number = request.data.get("phone_number")
-        code = request.data.get("code")
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response({"message": "کد صحیح است."}, status=status.HTTP_200_OK)
 
-        try:
-            otp = OTP.objects.filter(phone_number=phone_number, code=code).latest("created_at")
-        except OTP.DoesNotExist:
-            return Response({"error": "کد اشتباه است"}, status=400)
 
-        if not otp.is_valid():
-            return Response({"error": "کد منقضی شده است"}, status=400)
+class ResetPasswordView(generics.GenericAPIView):
+    serializer_class = ResetPasswordSerializer
 
-        user, created = User.objects.get_or_create(phone_number=phone_number)
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
-            "user": UserSerializer(user).data,
-        })
+        user = serializer.validated_data["user"]
+        new_password = serializer.validated_data["password"]
+
+        user.password = make_password(new_password)
+        user.save()
+
+        PasswordResetCode.objects.filter(user=user).delete()
+
+        return Response({"message": "رمز عبور با موفقیت تغییر یافت."}, status=status.HTTP_200_OK)

@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 
+from accounts.models import PasswordResetCode
+
 User = get_user_model()
 
 
@@ -42,5 +44,46 @@ class ChangePasswordSerializer(serializers.Serializer):
         return data
 
 
-class ForgotPasswordSerializer(serializers.Serializer):
-    email = serializers.EmailField(help_text="ایمیل کاربر")
+class SendResetCodeSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=11)
+
+    def validate(self, attrs):
+        phone = attrs.get("phone_number")
+        try:
+            attrs["user"] = User.objects.get(phone_number=phone)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("کاربری با این شماره یافت نشد.")
+        return attrs
+
+
+class VerifyResetCodeSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=11)
+    code = serializers.CharField(max_length=6)
+
+    def validate(self, attrs):
+        phone = attrs.get("phone_number")
+        code = attrs.get("code")
+
+        try:
+            user = User.objects.get(phone_number=phone)
+            reset_code = PasswordResetCode.objects.get(user=user, code=code)
+        except (User.DoesNotExist, PasswordResetCode.DoesNotExist):
+            raise serializers.ValidationError("کد وارد شده نامعتبر است.")
+
+        if not reset_code.is_valid():
+            raise serializers.ValidationError("کد منقضی شده است.")
+        attrs["user"] = user
+        return attrs
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=11)
+    password = serializers.CharField(write_only=True, min_length=6)
+
+    def validate(self, attrs):
+        phone = attrs.get("phone_number")
+        try:
+            attrs["user"] = User.objects.get(phone_number=phone)
+        except User.DoesNotExist:
+            raise serializers.ValidationError("کاربر یافت نشد.")
+        return attrs
