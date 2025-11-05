@@ -4,6 +4,9 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.text import slugify
 from .managers import UserManager
 from utils.validator import mobile_validator
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils import timezone
+
 
 def upload_image(instance, filename):
     path = 'uploads/' + 'users/' + \
@@ -17,6 +20,16 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=100, verbose_name="نام خانوادگی")
     phone_number = models.CharField(
         max_length=11, unique=True, verbose_name="شماره تلفن")
+    
+    birthday_day = models.PositiveSmallIntegerField(
+        verbose_name="روز تولد", null=True, blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(31)]
+    )
+    birthday_month = models.PositiveSmallIntegerField(
+        verbose_name="ماه تولد", null=True, blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(12)]
+    )
+    
     created_at = models.DateTimeField(
         auto_now_add=True, verbose_name="تاریخ ثبت")
     updated_at = models.DateTimeField(
@@ -121,3 +134,10 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def get_avatar(self):
         return self.image.url if self.image else 'static/img/user-3.jpg'
+    
+    @property
+    def has_birthday_today(self):
+        if not self.birthday_day or not self.birthday_month:
+            return False
+        today = timezone.localdate()
+        return today.day == self.birthday_day and today.month == self.birthday_month
