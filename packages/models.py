@@ -7,12 +7,16 @@ from django.utils.text import slugify
 
 from business.models import Service, Business
 
+import os
+import uuid
+from django.utils.text import slugify
 
 def upload_package_image(instance, filename):
-    path = 'uploads/' + 'packages/' + 'img' + \
-        slugify(instance.name, allow_unicode=True)
-    name = str(time.time()) + '-' + str(instance.name) + '-' + filename
-    return path + '/' + name
+    short_name = slugify(instance.name, allow_unicode=True)[:50]  
+    ext = filename.split('.')[-1]
+    unique_name = f"{int(time.time())}_{uuid.uuid4().hex[:8]}_{short_name}.{ext}"
+    path = os.path.join('uploads/packages', unique_name)
+    return path
 
 class Package(models.Model):
     business = models.ForeignKey(
