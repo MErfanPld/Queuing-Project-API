@@ -113,7 +113,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'narjin_app_db_9472',
         'USER': 'narjin_usr_7821',
-        'PASSWORD': 'Ue!94n$Pq2@xL#8mZt',
+        'PASSWORD': 'erfan1070',
     }
 }
 
