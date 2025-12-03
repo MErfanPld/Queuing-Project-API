@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'working_hours',
     'packages',
     'dashboard',
+    'reminders',
     'comments',
 ]
 
@@ -255,9 +256,12 @@ CELERY_TIMEZONE = 'Asia/Tehran'
 # --- Beat Schedule  ---
 from celery.schedules import crontab
 
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
+
 CELERY_BEAT_SCHEDULE = {
-    'send-birthday-sms-every-day': {
-        'task': 'users.tasks.send_daily_birthday_sms', 
-        'schedule': crontab(hour=0, minute=1), 
+    "send-upcoming-reminders-every-5-min": {
+        "task": "reminders.tasks.send_upcoming_appointment_reminders", 
+        "schedule": 300,
     },
 }

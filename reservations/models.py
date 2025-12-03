@@ -24,6 +24,7 @@ class Appointment(models.Model):
     time_slot = models.ForeignKey(AvailableTimeSlot, on_delete=models.CASCADE, related_name='appointments', verbose_name="بازه زمانی", null=True)
     status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
+    reminder_sent = models.BooleanField(default=False, verbose_name="یادآوری ارسال شده")
 
     class Meta:
         verbose_name = "نوبت"
