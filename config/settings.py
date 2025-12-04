@@ -262,6 +262,6 @@ CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 CELERY_BEAT_SCHEDULE = {
     "send-upcoming-reminders-every-5-min": {
         "task": "reminders.tasks.send_upcoming_appointment_reminders", 
-        "schedule": 300,
+        "schedule": 10,
     },
 }
