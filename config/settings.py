@@ -219,6 +219,7 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Project description',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_FORMATS': ['json'],
 }
 
 
