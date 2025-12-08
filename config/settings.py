@@ -261,8 +261,16 @@ CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
 
 CELERY_BEAT_SCHEDULE = {
+    # 1️⃣ یادآوری نوبت‌ها هر ۵ دقیقه
     "send-upcoming-reminders-every-5-min": {
-        "task": "reminders.tasks.send_upcoming_appointment_reminders", 
-        "schedule": 10,
+        "task": "reminders.tasks.send_upcoming_appointment_reminders",
+        "schedule": timedelta(minutes=5),  # یا 'crontab(minute='*/5')'
+    },
+
+    # 2️⃣ پیامک تولد هر روز ساعت ۹ صبح
+    "send-daily-birthday-sms": {
+        "task": "users.tasks.send_daily_birthday_sms",
+        "schedule": crontab(hour=9, minute=0),
+        # "schedule": timedelta(seconds=10),
     },
 }

@@ -14,7 +14,7 @@ class UserAdmin(BaseUserAdmin):
     # بخش‌های مختلف فرم در ادمین
     fieldsets = (
         ("اطلاعات اصلی", {'fields': ('phone_number', 'password')}),
-        ('اطلاعات شخصی', {'fields': ('first_name', 'last_name', 'image')}),
+        ('اطلاعات شخصی', {'fields': ('first_name', 'last_name', 'image',('birthday_day', 'birthday_month'),)}),
         ('دسترسی‌ها', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_owner', 'groups', 'user_permissions')}),
         # حذف فیلد تاریخ ویرایش
     )

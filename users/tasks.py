@@ -19,7 +19,10 @@ def send_daily_birthday_sms():
     for user in users:
         name = user.first_name.strip() if user.first_name else "عزیز"
         result = send_birthday_sms(user.phone_number, name)
-        if result and result.get('StrRetStatus') == 'Ok':
+
+        print("BIRTHDAY SMS RESULT:", result)
+
+        if result and result.get('status') == 'ارسال موفق بود':
             sent_count += 1
 
     print(f"تعداد پیامک‌های تولد ارسال‌شده: {sent_count}")

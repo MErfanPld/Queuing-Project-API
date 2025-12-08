@@ -23,8 +23,9 @@ class Appointment(models.Model):
     # time = models.TimeField(verbose_name="زمان")
     time_slot = models.ForeignKey(AvailableTimeSlot, on_delete=models.CASCADE, related_name='appointments', verbose_name="بازه زمانی", null=True)
     status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default='pending', verbose_name="وضعیت")
+        max_length=10, choices=STATUS_CHOICES, default='confirmed', verbose_name="وضعیت")
     reminder_sent = models.BooleanField(default=False, verbose_name="یادآوری ارسال شده")
+    canceled_at = models.DateTimeField(null=True, blank=True, verbose_name="زمان لغو")
 
     class Meta:
         verbose_name = "نوبت"
@@ -68,3 +69,41 @@ class Appointment(models.Model):
 
             self.status = 'confirmed'
             self.save()
+
+    def cancel(self, refund=True):
+            """
+            لغو رزرو + بازگشت وجه در صورت نیاز
+            """
+            from django.utils import timezone
+            from payments.models import Transaction
+            from django.core.exceptions import ValidationError
+
+            if self.status == 'canceled':
+                raise ValidationError("این رزرو قبلاً لغو شده است.")
+
+            self.status = 'canceled'
+            self.canceled_at = timezone.now()
+            self.save()
+
+            # اگر پرداخت با کیف پول بوده و refund True باشد
+            if refund and hasattr(self.user, "wallet"):
+                wallet = self.user.wallet
+                cost = self.service.price
+
+                wallet.increase(cost)
+
+                Transaction.objects.create(
+                    wallet=wallet,
+                    amount=cost,
+                    type='DEPOSIT',
+                    reservation=self,
+                    status='SUCCESS',
+                    description='Refund after cancellation'
+                )
+
+
+
+
+
+
+    

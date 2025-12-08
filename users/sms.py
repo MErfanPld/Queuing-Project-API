@@ -1,8 +1,7 @@
-# utils/sms.py
 import requests
 
 API_KEY = "456a6b916ca64f24bb14b5ca310a97bc"
-BIRTHDAY_BODY_ID = 123456  # قالب تولد در ملی‌پیامک
+BIRTHDAY_BODY_ID = 389200  # قالب تولد در ملی‌پیامک
 
 def send_birthday_sms(phone_number, name):
     url = f"https://console.melipayamak.com/api/send/shared/{API_KEY}"
