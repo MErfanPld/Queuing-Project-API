@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from datetime import datetime, timedelta, time
 from drf_spectacular.utils import extend_schema
 
-from business.models import Employee, Service
+from business.models import AvailableTimeSlot, Employee, Service
 from reservations.utils import send_cancel_sms, send_reservation_sms
 from .models import Appointment
 from .serializers import AppointmentSerializer
@@ -65,3 +65,6 @@ class AppointmentCancelView(generics.GenericAPIView):
         send_cancel_sms(phone, name, appointment.service.name)
 
         return Response({"message": "نوبت با موفقیت لغو شد."})
+    
+    
+ 

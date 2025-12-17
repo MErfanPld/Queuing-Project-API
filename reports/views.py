@@ -145,3 +145,39 @@ class AppointmentReportAPIView(APIView):
             'total_appointments': appointments.count(),
             'appointments': appointment_list
         })
+        
+        
+        
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from django.db.models import Count, Q
+
+from business.models import Service
+from reservations.models import Appointment
+
+class TopServicesByReservationsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        if not (user.is_superuser or getattr(user, 'is_owner', False)):
+            return Response({"error": "دسترسی ندارید"}, status=403)
+
+        # شمارش نوبت‌های تایید شده هر سرویس
+        services = Service.objects.annotate(
+            confirmed_count=Count('appointments', filter=Q(appointments__status='confirmed'))
+        ).order_by('-confirmed_count')
+
+        report = [
+            {
+                'service_id': s.id,
+                'service_name': s.name,
+                'confirmed_appointments': s.confirmed_count
+            } for s in services
+        ]
+
+        return Response({
+            'top_by_reservations': report[:5],  # ۵ سرویس پرفروش
+            'full_report': report
+        })

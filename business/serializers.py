@@ -91,3 +91,62 @@ class TimeSlotStatusUpdateSerializer(serializers.ModelSerializer):
         model = AvailableTimeSlot
         fields = ['is_available']
         
+from rest_framework import serializers
+from django.db import transaction
+from datetime import datetime
+
+from reservations.models import Appointment
+from business.models import AvailableTimeSlot
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Appointment
+        fields = "__all__"
+
+    def validate(self, attrs):
+        service = attrs['service']
+        time_slot = attrs['time_slot']
+
+        # 1️⃣ ساعت متعلق به همین سرویس باشد
+        if time_slot.service != service:
+            raise serializers.ValidationError(
+                "این ساعت متعلق به سرویس انتخاب‌شده نیست."
+            )
+
+        # 2️⃣ فعال باشد
+        if not time_slot.is_available:
+            raise serializers.ValidationError(
+                "این ساعت غیرفعال است."
+            )
+
+        # 3️⃣ تداخل زمانی نداشته باشد
+        start_dt = datetime.combine(time_slot.date, time_slot.start_time)
+        end_dt = start_dt + service.duration
+
+        conflict = Appointment.objects.filter(
+            service=service,
+            time_slot__date=time_slot.date,
+            status='confirmed',
+            time_slot__start_time__lt=end_dt.time(),
+            time_slot__start_time__gte=start_dt.time()
+        ).exists()
+
+        if conflict:
+            raise serializers.ValidationError(
+                "این بازه زمانی قبلاً رزرو شده است."
+            )
+
+        return attrs
+
+    def create(self, validated_data):
+        with transaction.atomic():
+            appointment = Appointment.objects.create(**validated_data)
+
+            # قفل کردن ساعت
+            slot = appointment.time_slot
+            slot.is_available = False
+            slot.save(update_fields=["is_available"])
+
+            return appointment

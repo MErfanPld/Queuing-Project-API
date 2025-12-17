@@ -37,6 +37,11 @@ class DashboardView(APIView):
 
             appointment_data = AppointmentSerializer(appointments, many=True).data
 
+            # 🔹 آمار کنسلی‌ها
+            canceled_appointments = appointments.filter(status='canceled')
+            canceled_count = canceled_appointments.count()
+            latest_canceled = AppointmentSerializer(canceled_appointments.order_by('-canceled_at')[:5], many=True).data
+
             return Response({
                 'type': 'admin',
                 'total_appointments': len(appointment_data),
@@ -50,6 +55,8 @@ class DashboardView(APIView):
                 'active_users': users.count(),
                 'recent_payments': latest_payments,
                 'new_users': list(new_users),
+                'canceled_appointments_count': canceled_count,
+                'latest_canceled_appointments': latest_canceled,
             })
 
         else:
@@ -63,6 +70,11 @@ class DashboardView(APIView):
             last_5_payments = PaymentSerializer(payments[:5], many=True).data
             unpaid_payments = payments.filter(status='unpaid').count()
 
+            # 🔹 آمار کنسلی‌های کاربر
+            canceled_appointments = appointments.filter(status='canceled')
+            canceled_count = canceled_appointments.count()
+            latest_canceled = AppointmentSerializer(canceled_appointments.order_by('-canceled_at')[:5], many=True).data
+
             return Response({
                 'type': 'user',
                 'total_appointments': total_appointments,
@@ -70,4 +82,6 @@ class DashboardView(APIView):
                 'last_appointments': last_5_appointments,
                 'last_payments': last_5_payments,
                 'unpaid_reminder': unpaid_payments > 0,
+                'canceled_appointments_count': canceled_count,
+                'latest_canceled_appointments': latest_canceled,
             })

@@ -5,6 +5,13 @@ from rest_framework import status
 from acl.mixins import PermissionMixin
 from acl.rest_mixin import RestPermissionMixin
 from .models import Business, Employee, Service
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from datetime import datetime
+from business.models import Service, AvailableTimeSlot
+from reservations.models import Appointment
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated
 
@@ -129,3 +136,75 @@ class AvailableTimeSlotListCreateView(PermissionMixin,generics.ListCreateAPIView
             queryset = queryset.filter(date=date)
 
         return queryset
+    
+    
+    
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter(
+            name='service_id',
+            description='ID سرویس انتخاب‌شده',
+            required=True,
+            type=int
+        ),
+        OpenApiParameter(
+            name='date',
+            description='تاریخ رزرو (YYYY-MM-DD)',
+            required=True,
+            type=str
+        ),
+    ],
+    responses={200: OpenApiParameter(
+        name='available_times',
+        description='لیست ساعت‌های دردسترس',
+        type=dict
+    )}
+)
+
+class AvailableTimesByServiceView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        service_id = request.query_params.get('service_id')
+        date = request.query_params.get('date')
+
+        if not service_id or not date:
+            return Response(
+                {"error": "service_id و date الزامی است"},
+                status=400
+            )
+
+        try:
+            service = Service.objects.get(id=service_id)
+        except Service.DoesNotExist:
+            return Response({"error": "سرویس یافت نشد"}, status=404)
+
+        slots = AvailableTimeSlot.objects.filter(
+            service=service,
+            date=date,
+            is_available=True
+        )
+
+        available_times = []
+
+        for slot in slots:
+            start_dt = datetime.combine(slot.date, slot.start_time)
+            end_dt = start_dt + service.duration
+
+            has_conflict = Appointment.objects.filter(
+                service=service,
+                time_slot__date=date,
+                status='confirmed',
+                time_slot__start_time__lt=end_dt.time(),
+                time_slot__start_time__gte=start_dt.time()
+            ).exists()
+
+            if not has_conflict:
+                available_times.append({
+                    "slot_id": slot.id,
+                    "start_time": slot.start_time,
+                    "end_time": end_dt.time()
+                })
+
+        return Response(available_times)
