@@ -4,5 +4,6 @@ from .views import *
 urlpatterns = [
     path('appointments/', AppointmentListCreateView.as_view(), name='appointment-list-create'),
     path('appointments/<int:pk>/', AppointmentRetrieveUpdateDestroyView.as_view(), name='appointment-detail'),
-    path('appointments/<int:pk>/cancel/', AppointmentCancelView.as_view()),
+    path('appointments/<int:pk>/cancel/', AppointmentCancelView.as_view(),name='appointment-cancel'
+),
 ]
