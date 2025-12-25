@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -47,24 +48,23 @@ class AppointmentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView
         return Appointment.objects.filter(user=user)
 
 
-class AppointmentCancelView(generics.GenericAPIView):
+class AppointmentCancelView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, pk):
-        try:
-            appointment = Appointment.objects.get(pk=pk, user=request.user)
-        except Appointment.DoesNotExist:
-            return Response({"error": "نوبت یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+        appointment = get_object_or_404(
+            Appointment,
+            pk=pk,
+            user=request.user
+        )
 
-        # اجرای تابع لغو
         appointment.cancel(refund=True)
-
-        # ارسال پیامک لغو موفق
-        phone = appointment.user.phone_number
-        name = appointment.user.first_name or "کاربر"
-        send_cancel_sms(phone, name, appointment.service.name)
+        send_cancel_sms(
+            appointment.user.phone_number,
+            appointment.user.first_name or "کاربر",
+            appointment.service.name
+        )
 
         return Response({"message": "نوبت با موفقیت لغو شد."})
-    
     
  
