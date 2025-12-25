@@ -2,12 +2,20 @@ from rest_framework import serializers
 from .models import Comment
 from business.models import Business,Service
 
-
 class CommentSerializer(serializers.ModelSerializer):
+    target_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Comment
         fields = '__all__'
-        read_only_fields = ['user', 'is_approved', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'is_approved', 'created_at', 'updated_at', 'target_name']
+
+    def get_target_name(self, obj):
+        if obj.target_type == 'service' and obj.service:
+            return obj.service.name
+        elif obj.target_type == 'business' and obj.business:
+            return obj.business.name
+        return '---'
 
     def validate(self, attrs):
         target_type = attrs.get('target_type') or getattr(self.instance, 'target_type', None)
@@ -19,7 +27,7 @@ class CommentSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     "service": "برای ثبت نظر درباره سرویس باید سرویس را انتخاب کنید."
                 })
-            attrs['business'] = service.business  # 🔥 خیلی مهم
+            attrs['business'] = service.business
 
         elif target_type == 'business':
             if not business:
@@ -34,4 +42,3 @@ class CommentSerializer(serializers.ModelSerializer):
             })
 
         return attrs
-
