@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'dashboard',
     'reminders',
     'comments',
+    'landing',
 ]
 
 MIDDLEWARE = [
