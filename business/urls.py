@@ -21,4 +21,5 @@ urlpatterns = [
     path('slots/by-date-post/', AvailableTimeSlotListCreateView.as_view(), name='slots-by-date-post'),
 
     path("available-times/",AvailableTimesByServiceView.as_view(),name="available-times-by-service"),
+    
 ]

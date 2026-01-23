@@ -29,3 +29,35 @@ class PlanSerializer(serializers.ModelSerializer):
             'duration_days',
             'features'
         ]
+
+
+from rest_framework import serializers
+from business.models import Business, Subscription
+from business.serializers import BusinessSerializer
+from landing.serializers import PlanSerializer
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    business = BusinessSerializer(read_only=True)
+    plan = PlanSerializer(read_only=True)
+
+    # مقداردهی queryset مستقیم
+    business_id = serializers.PrimaryKeyRelatedField(
+        queryset=Business.objects.all(), write_only=True, source='business'
+    )
+    plan_id = serializers.PrimaryKeyRelatedField(
+        queryset=Plan.objects.filter(is_active=True),
+        write_only=True,
+        source='plan',
+        required=False,
+        allow_null=True
+    )
+
+    class Meta:
+        model = Subscription
+        fields = [
+            'id',
+            'business', 'plan',
+            'business_id', 'plan_id',
+            'trial_start', 'trial_end',
+            'active'
+        ]

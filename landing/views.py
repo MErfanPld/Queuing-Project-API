@@ -29,3 +29,17 @@ class PlanFeatureAdminViewSet(ModelViewSet):
     queryset = PlanFeature.objects.all()
     serializer_class = PlanFeatureSerializer
     permission_classes = [IsAdminUser]
+
+
+from rest_framework.generics import RetrieveAPIView
+from business.models import Subscription
+from .serializers import SubscriptionSerializer
+from rest_framework.permissions import IsAuthenticated
+
+class SubscriptionDetailAPIView(RetrieveAPIView):
+    serializer_class = SubscriptionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # فرض: کاربر فقط یک کسب‌وکار دارد
+        return self.request.user.business.subscription

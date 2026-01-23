@@ -39,3 +39,5 @@ class PlanFeature(models.Model):
 
     class Meta:
         unique_together = ('plan', 'feature')
+
+

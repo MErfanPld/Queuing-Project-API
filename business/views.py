@@ -27,6 +27,12 @@ class BusinessListCreateView(PermissionMixin,generics.ListCreateAPIView):
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Business.objects.all()
+        return Business.objects.filter(owner=user)
+
 
 class BusinessRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, RestPermissionMixin]
@@ -34,6 +40,11 @@ class BusinessRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateD
     queryset = Business.objects.all()
     serializer_class = BusinessSerializer
     
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Business.objects.all()
+        return Business.objects.filter(owner=user)
 
 #? ============================= Employee CRUD =============================
 
@@ -43,6 +54,11 @@ class EmployeeListView(PermissionMixin,generics.ListAPIView):
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Employee.objects.all()
+        return Employee.objects.filter(business__owner=user)
 
 class EmployeeCreateView(PermissionMixin,generics.CreateAPIView):
     permission_classes = [IsAuthenticated, RestPermissionMixin]
@@ -62,6 +78,12 @@ class EmployeeRetrieveDestroyView(PermissionMixin,generics.RetrieveDestroyAPIVie
     queryset = Employee.objects.all()
     serializer_class = EmployeeSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Employee.objects.all()
+        return Employee.objects.filter(business__owner=user)
+
 #? ============================= Services CRUD =============================
 
 # class ServiceListCreateView(generics.ListCreateAPIView):
@@ -76,12 +98,22 @@ class ServiceListView(PermissionMixin,generics.ListAPIView):
     serializer_class = ServiceSerializer
     permissions = ['service_list']  
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return Service.objects.all()
+        return Service.objects.filter(business__owner=user)
+
+
 class ServiceCreateView(PermissionMixin,generics.CreateAPIView):
     permission_classes = [IsAuthenticated,RestPermissionMixin]
     queryset = Service.objects.all()
     serializer_class = ServiceSerializer
     permissions = ['service_create']
 
+    def perform_create(self, serializer):
+        business = Business.objects.get(owner=self.request.user)
+        serializer.save(business=business)
 
 class ServiceRetrieveUpdateDestroyView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
@@ -97,12 +129,23 @@ class AvailableTimeSlotListView(PermissionMixin,generics.ListAPIView):
     queryset = AvailableTimeSlot.objects.all()
     serializer_class = AvailableTimeSlotSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return AvailableTimeSlot.objects.all()
+        return AvailableTimeSlot.objects.filter(service__business__owner=user)
 
 class AvailableTimeSlotCreateView(PermissionMixin,generics.CreateAPIView):
     permission_classes = [IsAuthenticated]
     permissions = ['time_slot_create']
     queryset = AvailableTimeSlot.objects.all()
     serializer_class = AvailableTimeSlotSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_superuser:
+            return AvailableTimeSlot.objects.all()
+        return AvailableTimeSlot.objects.filter(service__business__owner=user)
 
 
 class AvailableTimeSlotDetailUpdateDeleteView(PermissionMixin,generics.RetrieveUpdateDestroyAPIView):

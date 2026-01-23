@@ -9,4 +9,5 @@ router.register('admin/plan-features', PlanFeatureAdminViewSet)
 urlpatterns = [
     path('plans/', PlanListAPIView.as_view()),
     path('', include(router.urls)),
+    path('subscription/', SubscriptionDetailAPIView.as_view(), name='subscription-detail')
 ]

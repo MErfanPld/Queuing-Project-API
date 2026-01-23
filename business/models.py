@@ -93,3 +93,46 @@ class AvailableTimeSlot(models.Model):
         start_dt = datetime.combine(self.date, self.start_time)
         return (start_dt + self.service.duration).time()
     
+    
+    
+from django.db import models
+from django.utils import timezone
+from datetime import timedelta
+from business.models import Business
+from landing.models import Plan, PlanFeature
+
+def default_trial_end():
+    return timezone.now() + timedelta(days=7)
+
+class Subscription(models.Model):
+    business = models.OneToOneField(
+        Business, on_delete=models.CASCADE, verbose_name="کسب‌وکار"
+    )
+    plan = models.ForeignKey(
+        Plan, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="پلن خریداری شده"
+    )
+    trial_start = models.DateTimeField(default=timezone.now, verbose_name="شروع آزمایشی")
+    trial_end = models.DateTimeField(default=default_trial_end, verbose_name="پایان آزمایشی")
+    active = models.BooleanField(default=True, verbose_name="فعال؟")
+
+    def is_trial(self):
+        now = timezone.now()
+        return self.trial_start <= now <= self.trial_end
+
+    def __str__(self):
+        return f"{self.business.name} - {self.plan.title if self.plan else 'Trial'}"
+
+    def has_feature(self, feature_key):
+            """
+            بررسی اینکه این کسب‌وکار دسترسی به Feature با key مشخص داره
+            """
+            if self.is_trial():
+                # فرض: در Trial ۳ Feature اولیه فعال هستند
+                trial_features_keys = ['reservations', 'employees', 'working_hours']
+                return feature_key in trial_features_keys
+
+            if self.plan:
+                plan_features = PlanFeature.objects.filter(plan=self.plan, feature__key=feature_key)
+                return plan_features.exists()
+
+            return False
