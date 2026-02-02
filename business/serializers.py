@@ -1,56 +1,97 @@
 from rest_framework import serializers
-
-from users.serializers import UserSerializer
-from .models import AvailableTimeSlot, Business, Employee, Service
+from django.db import transaction
+from datetime import datetime
 from users.models import User
+from .models import AvailableTimeSlot, Business, Employee, Service, Subscription
+from reservations.models import Appointment
 
+
+# ================= Business =================
 class BusinessSerializer(serializers.ModelSerializer):
     class Meta:
         model = Business
-        fields = '__all__'
+        fields = ['id', 'name', 'slug', 'random_code', 'business_type', 'address', 'phone_number', 'is_active']
+        read_only_fields = ['random_code', 'is_active']
 
 
+# ================= Employee =================
 class EmployeeSerializer(serializers.ModelSerializer):
-    user = UserSerializer() 
+    user = serializers.SerializerMethodField()
+    business = serializers.SerializerMethodField()
 
     class Meta:
         model = Employee
-        fields = '__all__'
-
-    def create(self, validated_data):
-        user_data = validated_data.pop('user')  
-        user, created = User.objects.get_or_create(phone_number=user_data['phone_number'], defaults=user_data)
-
-        employee = Employee.objects.create(user=user, **validated_data)
-        return employee
-
-
-class EmployeeCreateUpdateSerializer(serializers.ModelSerializer):
-    user_id = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        source='user',
-        write_only=True
-    )
-    user = serializers.SerializerMethodField(read_only=True)  # نمایش نام کاربر
-
-    class Meta:
-        model = Employee
-        fields = ['id', 'user_id', 'user', 'skill']
+        fields = ['id', 'user', 'business', 'skill']
 
     def get_user(self, obj):
+        role_name = getattr(getattr(obj.user, 'role', None), 'role_name', 'کاربر')
         return {
             "id": obj.user.id,
             "name": f"{obj.user.first_name} {obj.user.last_name}".strip(),
             "phone": obj.user.phone_number,
+            "role": role_name
         }
 
+    def get_business(self, obj):
+        if obj.business:
+            return {
+                "id": obj.business.id,
+                "name": obj.business.name,
+                "type": obj.business.business_type,
+                "is_active": obj.business.is_active
+            }
+        return None
 
-class ServiceSerializer(serializers.ModelSerializer):
-    business_id = serializers.PrimaryKeyRelatedField(
-        queryset=Business.objects.all(), source='business', write_only=True
+
+class EmployeeCreateUpdateSerializer(serializers.ModelSerializer):
+    user_id = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(is_active=True),
+        source='user',
+        write_only=True
     )
+    user = serializers.SerializerMethodField(read_only=True)
+    business = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Employee
+        fields = ['id', 'user_id', 'user', 'business', 'skill']
+
+    def get_user(self, obj):
+        role_name = getattr(getattr(obj.user, 'role', None), 'role_name', 'کاربر')
+        return {
+            "id": obj.user.id,
+            "name": f"{obj.user.first_name} {obj.user.last_name}".strip(),
+            "phone": obj.user.phone_number,
+            "role": role_name
+        }
+
+    def get_business(self, obj):
+        if obj.business:
+            return {
+                "id": obj.business.id,
+                "name": obj.business.name,
+                "type": obj.business.business_type,
+                "is_active": obj.business.is_active
+            }
+        return None
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        business = Business.objects.filter(owner=request.user).first()
+        if not business:
+            raise serializers.ValidationError("شما صاحب کسب‌وکار نیستید یا کسب‌وکار ثبت نشده است")
+        validated_data['business'] = business
+        return super().create(validated_data)
+
+
+# ================= Service =================
+class ServiceSerializer(serializers.ModelSerializer):
     employee_id = serializers.PrimaryKeyRelatedField(
-        queryset=Employee.objects.all(), source='employee', write_only=True
+        queryset=Employee.objects.all(),
+        source='employee',
+        write_only=True,
+        allow_null=True,
+        required=False
     )
 
     business = BusinessSerializer(read_only=True)
@@ -59,48 +100,50 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = [
-            'id',
-            'name',
-            'price',
-            'description',
-            'duration',
-            'business_id',
-            'employee_id',
-            'business',
-            'employee'
+            'id', 'name', 'price', 'description', 'duration',
+            'employee_id', 'business', 'employee', 'is_active'
         ]
+        read_only_fields = ['business']
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        business = Business.objects.filter(owner=request.user).first()
+        validated_data['business'] = business
+        return super().create(validated_data)
 
 
+# ================= AvailableTimeSlot =================
 class AvailableTimeSlotSerializer(serializers.ModelSerializer):
+    service_id = serializers.PrimaryKeyRelatedField(
+        queryset=Service.objects.filter(is_active=True),
+        source='service',
+        write_only=True
+    )
     start_time = serializers.TimeField(format='%H:%M')
     end_time = serializers.SerializerMethodField()
-    
+
     class Meta:
         model = AvailableTimeSlot
-        fields = ['id', 'service', 'date', 'start_time', 'end_time', 'is_available']
-
-    def get_start_time(self, obj):
-        return obj.start_time.strftime('%H:%M')
+        fields = [
+            'id', 'service_id', 'service',
+            'date', 'start_time', 'end_time',
+            'is_available'
+        ]
+        read_only_fields = ['service']
 
     def get_end_time(self, obj):
-        return obj.end_time.strftime('%H:%M')
-        
-        
+        end = datetime.combine(obj.date, obj.start_time) + obj.service.duration
+        return end.time().strftime('%H:%M')
+
+
 class TimeSlotStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = AvailableTimeSlot
         fields = ['is_available']
-        
-from rest_framework import serializers
-from django.db import transaction
-from datetime import datetime
-
-from reservations.models import Appointment
-from business.models import AvailableTimeSlot
 
 
+# ================= Appointment =================
 class AppointmentSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = Appointment
         fields = "__all__"
@@ -109,19 +152,12 @@ class AppointmentSerializer(serializers.ModelSerializer):
         service = attrs['service']
         time_slot = attrs['time_slot']
 
-        # 1️⃣ ساعت متعلق به همین سرویس باشد
         if time_slot.service != service:
-            raise serializers.ValidationError(
-                "این ساعت متعلق به سرویس انتخاب‌شده نیست."
-            )
+            raise serializers.ValidationError("این ساعت متعلق به سرویس نیست")
 
-        # 2️⃣ فعال باشد
         if not time_slot.is_available:
-            raise serializers.ValidationError(
-                "این ساعت غیرفعال است."
-            )
+            raise serializers.ValidationError("این ساعت غیرفعال است")
 
-        # 3️⃣ تداخل زمانی نداشته باشد
         start_dt = datetime.combine(time_slot.date, time_slot.start_time)
         end_dt = start_dt + service.duration
 
@@ -130,23 +166,18 @@ class AppointmentSerializer(serializers.ModelSerializer):
             time_slot__date=time_slot.date,
             status='confirmed',
             time_slot__start_time__lt=end_dt.time(),
-            time_slot__start_time__gte=start_dt.time()
+            time_slot__end_time__gt=start_dt.time()
         ).exists()
 
         if conflict:
-            raise serializers.ValidationError(
-                "این بازه زمانی قبلاً رزرو شده است."
-            )
+            raise serializers.ValidationError("این بازه قبلاً رزرو شده")
 
         return attrs
 
     def create(self, validated_data):
         with transaction.atomic():
-            appointment = Appointment.objects.create(**validated_data)
-
-            # قفل کردن ساعت
+            appointment = super().create(validated_data)
             slot = appointment.time_slot
             slot.is_available = False
-            slot.save(update_fields=["is_available"])
-
+            slot.save(update_fields=['is_available'])
             return appointment

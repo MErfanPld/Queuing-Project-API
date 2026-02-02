@@ -26,7 +26,8 @@ class Appointment(models.Model):
         max_length=10, choices=STATUS_CHOICES, default='confirmed', verbose_name="وضعیت")
     reminder_sent = models.BooleanField(default=False, verbose_name="یادآوری ارسال شده")
     canceled_at = models.DateTimeField(null=True, blank=True, verbose_name="زمان لغو")
-
+    # created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد") 
+    
     class Meta:
         verbose_name = "نوبت"
         verbose_name_plural = "نوبت‌ها"
